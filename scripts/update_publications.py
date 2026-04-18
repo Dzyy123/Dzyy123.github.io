@@ -209,16 +209,28 @@ citation: '{citation}'
     return filename, md
 
 
-def get_existing_titles():
-    titles = set()
+def normalize_title(s):
+    """Lower-case + strip non-alphanumeric for fuzzy comparison."""
+    return re.sub(r'[^a-z0-9]+', '', s.lower())
+
+
+def get_existing_keys():
+    """Return (titles, arxiv_ids, paperurls) of existing publications,
+    used for dedup so that hand-curated entries are not re-added by S2."""
+    titles, arxiv_ids, paperurls = set(), set(), set()
     if not PUBLICATIONS_DIR.exists():
-        return titles
+        return titles, arxiv_ids, paperurls
     for md_file in PUBLICATIONS_DIR.glob("*.md"):
         content = md_file.read_text(encoding="utf-8")
         m = re.search(r'^title:\s*"(.+)"', content, re.MULTILINE)
         if m:
-            titles.add(m.group(1).lower().strip())
-    return titles
+            titles.add(normalize_title(m.group(1)))
+        for url_match in re.finditer(r"arxiv\.org/abs/([\d\.v]+)", content, re.IGNORECASE):
+            arxiv_ids.add(url_match.group(1).split("v")[0])
+        purl = re.search(r"^paperurl:\s*['\"]?(.+?)['\"]?\s*$", content, re.MULTILINE)
+        if purl:
+            paperurls.add(purl.group(1).strip())
+    return titles, arxiv_ids, paperurls
 
 
 def main():
@@ -227,8 +239,9 @@ def main():
     print("=" * 64)
 
     PUBLICATIONS_DIR.mkdir(parents=True, exist_ok=True)
-    existing = get_existing_titles()
-    print(f"Existing publications: {len(existing)}")
+    existing_titles, existing_arxiv, existing_urls = get_existing_keys()
+    print(f"Existing publications: {len(existing_titles)} "
+          f"(arxiv ids tracked: {len(existing_arxiv)})")
 
     candidate_papers = []
 
@@ -267,7 +280,10 @@ def main():
             skipped_not_self += 1
             continue
 
-        if title.lower().strip() in existing:
+        arxiv_id = get_arxiv_id(paper)
+        norm_title = normalize_title(title)
+
+        if norm_title in existing_titles or (arxiv_id and arxiv_id in existing_arxiv):
             print(f"  Skip (exists):         {title[:70]}")
             skipped_exists += 1
             continue
@@ -278,7 +294,9 @@ def main():
         filename, md = result
         (PUBLICATIONS_DIR / filename).write_text(md, encoding="utf-8")
         print(f"  Added:                 {filename}")
-        existing.add(title.lower().strip())
+        existing_titles.add(norm_title)
+        if arxiv_id:
+            existing_arxiv.add(arxiv_id)
         added += 1
 
     print("")

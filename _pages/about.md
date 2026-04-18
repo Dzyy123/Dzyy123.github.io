@@ -18,10 +18,8 @@ I am broadly interested in any research that helps machines reason about cause a
 
 News
 ======
-{% assign news = site.publications | sort: 'date' | reverse %}
-{% for post in news limit:5 %}
-- **{{ post.date | date: "%Y-%m-%d" }}** — New paper: *[{{ post.title }}]({{ post.url | relative_url }})* — {{ post.venue }}
-{% endfor %}
+{% assign news = site.publications | sort: 'date' | reverse %}{% for post in news limit:5 %}
+* **{{ post.date | date: "%Y-%m-%d" }}** — New paper: *[{{ post.title }}]({{ post.url | relative_url }})* — {{ post.venue }}{% endfor %}
 
 Selected Publications
 ======
