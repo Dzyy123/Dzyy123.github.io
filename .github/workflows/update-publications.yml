@@ -1,0 +1,48 @@
+name: Update Publications
+
+on:
+  schedule:
+    # Run every Monday at 08:00 UTC (16:00 Beijing)
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run publication updater
+        run: python scripts/update_publications.py
+
+      - name: Detect changes (tracked + untracked)
+        id: detect
+        run: |
+          # Stage everything so untracked files are visible to git diff --cached.
+          git add -N _publications
+          if git status --porcelain | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Detected changes:"
+            git status --short
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes."
+          fi
+
+      - name: Commit and push
+        if: steps.detect.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(auto): refresh publications from Semantic Scholar"
+          git push
