@@ -11,8 +11,9 @@ redirect_from:
 
 Education
 ======
-* M.S. in Engineering, Tsinghua Shenzhen International Graduate School, Tsinghua University, Sep. 2022 – present
-* B.S., (please update with your undergraduate institution and year)
+* **Ph.D. in Data Science and Information Technology**, Tsinghua Shenzhen International Graduate School, Tsinghua University, Sep. 2025 – present
+  * Advisor: Prof. Xiao-Ping Zhang (IEEE Fellow)
+* **B.S. in Statistics**, School of Mathematical Sciences, Tongji University, Sep. 2021 – Jul. 2025
 
 Research Interests
 ======
@@ -28,10 +29,10 @@ Publications
 
 Skills
 ======
-* Programming: Python (PyTorch, NumPy, scikit-learn), R
-* Causal inference toolkits: causal-learn, DoWhy, LiNGAM
-* LLM tooling: HuggingFace Transformers, vLLM
-* LaTeX
+* **Programming:** Python (PyTorch, NumPy, scikit-learn), R
+* **Causal inference toolkits:** causal-learn, DoWhy, LiNGAM
+* **LLM tooling:** HuggingFace Transformers, vLLM
+* **Other:** LaTeX, Git
 
 Selected Talks
 ======
@@ -43,5 +44,5 @@ Service
 
 Contact
 ======
-- Email: `dingzy22 [at] mails [dot] tsinghua [dot] edu [dot] cn`
+- Email: `dingzy25 [at] mails [dot] tsinghua [dot] edu [dot] cn`
 - Tsinghua Shenzhen International Graduate School, Shenzhen, China

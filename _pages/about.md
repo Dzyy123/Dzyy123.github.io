@@ -7,7 +7,9 @@ redirect_from:
   - /about.html
 ---
 
-I am a master's student at the [Tsinghua Shenzhen International Graduate School](https://www.sigs.tsinghua.edu.cn/), Tsinghua University, advised by Prof. [Xiao-Ping Zhang](https://www.sigs.tsinghua.edu.cn/) (IEEE Fellow).
+I am a Ph.D. student in **Data Science and Information Technology** at the [Tsinghua Shenzhen International Graduate School](https://www.sigs.tsinghua.edu.cn/), Tsinghua University (since Sep. 2025), advised by Prof. [Xiao-Ping Zhang](https://www.sigs.tsinghua.edu.cn/) (IEEE Fellow).
+Before joining Tsinghua, I received my B.S. in **Statistics** from the [School of Mathematical Sciences](https://math.tongji.edu.cn/), Tongji University (Sep. 2021 – Jul. 2025).
+
 My research interests lie at the intersection of **causal inference** and **machine learning**, with a current focus on:
 
 - **Causal discovery** — identifiability, robust pairwise direction identification, and LiNGAM-style methods (e.g., GaussDetect-LiNGAM).
@@ -20,6 +22,8 @@ News
 ======
 {% assign news = site.publications | sort: 'date' | reverse %}{% for post in news limit:5 %}
 * **{{ post.date | date: "%Y-%m-%d" }}** — New paper: *[{{ post.title }}]({{ post.url | relative_url }})* — {{ post.venue }}{% endfor %}
+* **2025-09** — Started my Ph.D. at Tsinghua SIGS.
+* **2025-07** — Graduated from Tongji University with a B.S. in Statistics.
 
 Selected Publications
 ======
@@ -27,5 +31,5 @@ See the full list on the [Publications](/publications/) page or my [Google Schol
 
 Contact
 ======
-- Email: `dingzy22 [at] mails [dot] tsinghua [dot] edu [dot] cn`
+- Email: `dingzy25 [at] mails [dot] tsinghua [dot] edu [dot] cn`
 - Address: Tsinghua Shenzhen International Graduate School, Shenzhen, China
