@@ -27,13 +27,6 @@ Publications
     {% include archive-single-cv.html %}
   {% endfor %}</ul>
 
-Skills
-======
-* **Programming:** Python (PyTorch, NumPy, scikit-learn), R
-* **Causal inference toolkits:** causal-learn, DoWhy, LiNGAM
-* **LLM tooling:** HuggingFace Transformers, vLLM
-* **Other:** LaTeX, Git
-
 Selected Talks
 ======
 *(To be updated.)*
