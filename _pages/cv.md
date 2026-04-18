@@ -12,7 +12,7 @@ redirect_from:
 Education
 ======
 * **Ph.D. in Data Science and Information Technology**, Tsinghua Shenzhen International Graduate School, Tsinghua University, Sep. 2025 – present
-  * Advisor: Prof. Xiao-Ping Zhang (IEEE Fellow)
+  * Advisor: Prof. [Xiao-Ping (Steven) Zhang](https://sites.google.com/view/xiaopingzhang/home) — Tsinghua Pengrui Chair Professor; Founding Dean of the Institute of Data and Information (iDI); Fellow of IEEE / Canadian Academy of Engineering / Engineering Institute of Canada; VP-Education, IEEE Signal Processing Society; Member, IEEE Fellow Committee (2026–2027)
 * **B.S. in Statistics**, School of Mathematical Sciences, Tongji University, Sep. 2021 – Jul. 2025
 
 Research Interests

@@ -7,7 +7,10 @@ redirect_from:
   - /about.html
 ---
 
-I am a Ph.D. student in **Data Science and Information Technology** at the [Tsinghua Shenzhen International Graduate School](https://www.sigs.tsinghua.edu.cn/), Tsinghua University (since Sep. 2025), advised by Prof. [Xiao-Ping Zhang](https://www.sigs.tsinghua.edu.cn/) (IEEE Fellow).
+I am a Ph.D. student in **Data Science and Information Technology** at the [Tsinghua Shenzhen International Graduate School](https://www.sigs.tsinghua.edu.cn/) (SIGS), Tsinghua University (since Sep. 2025), advised by Prof. [Xiao-Ping (Steven) Zhang](https://sites.google.com/view/xiaopingzhang/home).
+
+> Prof. Zhang is **Tsinghua Pengrui Chair Professor** at Tsinghua SIGS, founding Dean of the **Institute of Data and Information (iDI)**, and a **Fellow of IEEE / Canadian Academy of Engineering / Engineering Institute of Canada**. He serves as **Vice President-Education** of the IEEE Signal Processing Society and is a member of the **IEEE Fellow Committee (2026–2027)**.
+
 Before joining Tsinghua, I received my B.S. in **Statistics** from the [School of Mathematical Sciences](https://math.tongji.edu.cn/), Tongji University (Sep. 2021 – Jul. 2025).
 
 My research interests lie at the intersection of **causal inference** and **machine learning**, with a current focus on:
