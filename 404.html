@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/ziyi-ding-icon-32-v2.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/brand/ziyi-ding-icon-48-v2.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/ziyi-ding-icon-180-v1.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#e9e6de" />
+    <title>Ziyi Ding · Causality, Embodied Intelligence &amp; a Little Life</title>
+    <meta
+      name="description"
+      content="Ziyi Ding (丁子毅), Ph.D. student at Tsinghua University (SIGS). Research in embodied intelligence, world models, causal discovery, and reliable machine reasoning."
+    />
+    <link rel="canonical" href="https://dzyy123.github.io/" />
+
+    <!-- Open Graph / WeChat / Slack / X social preview -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Ziyi Ding · Research Studio" />
+    <meta property="og:title" content="Ziyi Ding · Causality, Embodied Intelligence &amp; a Little Life" />
+    <meta
+      property="og:description"
+      content="Ph.D. student at Tsinghua University. Research in embodied intelligence, causal world models, causal discovery, and reliable machine reasoning."
+    />
+    <meta property="og:url" content="https://dzyy123.github.io/" />
+    <meta property="og:image" content="https://dzyy123.github.io/assets/brand/og-preview.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Ziyi Ding Interactive 3D Research Studio" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ziyi Ding · Causality, Embodied Intelligence &amp; a Little Life" />
+    <meta
+      name="twitter:description"
+      content="Ph.D. student at Tsinghua University. Research in embodied intelligence, causal world models, and reliable machine reasoning."
+    />
+    <meta name="twitter:image" content="https://dzyy123.github.io/assets/brand/og-preview.jpg" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Ziyi Ding",
+        "alternateName": "丁子毅",
+        "jobTitle": "Ph.D. Student in Data Science and Information Technology",
+        "affiliation": {
+          "@type": "CollegeOrUniversity",
+          "name": "Tsinghua University (Shenzhen International Graduate School)"
+        },
+        "alumniOf": {
+          "@type": "CollegeOrUniversity",
+          "name": "Tongji University"
+        },
+        "email": "mailto:dingzy25@mails.tsinghua.edu.cn",
+        "url": "https://dzyy123.github.io/",
+        "sameAs": [
+          "https://scholar.google.com/citations?user=1KeE6PsAAAAJ",
+          "https://github.com/Dzyy123",
+          "https://dzyy123.github.io/ziyi-research-studio/"
+        ]
+      }
+    </script>
+
+    <!-- Editorial typography: Newsreader (optical-size serif) + Inter (UI sans); CJK uses PingFang SC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+
+    <!--
+      资源请求失败报告（整改方案 §4.3）：
+      资源类 error 事件不冒泡，只能在捕获阶段拿到。这段脚本必须排在下面的
+      preload 之前，才能保证 404 的预加载也被点名。
+    -->
+    <script>
+      window.addEventListener(
+        'error',
+        function (e) {
+          var t = e.target
+          if (!t || t === window) return
+          var url = t.href || t.currentSrc || t.src
+          if (!url) return
+          if (t.tagName === 'LINK' && t.rel === 'preload') {
+            console.error('[preload] 预加载失败，检查 assetManifest 与 index.html 是否漂移：', url)
+          } else if (t.tagName === 'LINK' || t.tagName === 'IMG' || t.tagName === 'SCRIPT') {
+            console.error('[asset] 资源请求失败：', url)
+          }
+        },
+        true,
+      )
+    </script>
+    <script type="module" crossorigin src="/assets/index-BUsiC6NW.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vanilla-r-dD2DiH.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-D7ELpkfZ.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
