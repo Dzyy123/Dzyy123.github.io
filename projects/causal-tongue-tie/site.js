@@ -364,6 +364,13 @@
       causalvae: "world-models",
       "traj-lewm": "traj-lewm",
       "causal-tongue-tie": "causal-reasoning",
+      "gaussdetect-lingam": "causal-discovery",
+      icd: "intervene-calibrate-discover-learning-causal-structure-from-pixels",
+      egolam: "egolam",
+      "identification-closure": "identification-closure",
+      "tree-query": "tree-query",
+      "state-readout-decoupling": "state-readout-decoupling",
+      georefiner: "georefiner",
     };
     document.querySelectorAll("[data-sibling]").forEach((link) => {
       link.addEventListener("click", (e) => {

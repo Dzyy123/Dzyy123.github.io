@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f2efe8" />
+  <title>EgoLAM · Learning Latent Actions from Hand and Head Motion</title>
+  <meta name="description" content="EgoLAM: Learning Latent Actions from Hand and Head Motion (Preprint 2026)." />
+  <link rel="icon" type="image/svg+xml" href="assets/mark.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css?v=20261124g" />
+  <link rel="stylesheet" href="site.css?v=20261124g" />
+  <style>
+    .btn.demo-highlight {
+      background: #e4ede1;
+      border-color: var(--accent);
+      color: var(--accent-deep);
+      font-weight: 600;
+    }
+    .btn.demo-highlight:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+    .ego-grid {
+      display: grid;
+      grid-template-columns: minmax(96px, 0.9fr) minmax(124px, 1.1fr) minmax(128px, 1.14fr) minmax(124px, 1.1fr);
+      grid-template-rows: auto auto auto;
+      column-gap: 18px;
+      row-gap: 0;
+      align-items: stretch;
+    }
+    .ego-pill-hand {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: center;
+      margin-bottom: 15px;
+    }
+    .ego-pill-cam {
+      grid-column: 3;
+      grid-row: 1;
+      justify-self: center;
+      margin-bottom: 15px;
+    }
+    .ego-cell-rgb {
+      grid-column: 1;
+      grid-row: 2;
+      min-height: 68px;
+    }
+    .ego-cell-slots {
+      grid-column: 2;
+      grid-row: 2;
+      min-height: 68px;
+    }
+    .ego-cell-idm {
+      grid-column: 3;
+      grid-row: 2;
+      min-height: 68px;
+    }
+    .ego-cell-out {
+      grid-column: 4;
+      grid-row: 2;
+      min-height: 68px;
+    }
+    .ego-cell-head {
+      grid-column: 2;
+      grid-row: 3;
+      margin-top: 15px;
+      min-height: 58px;
+    }
+    .ego-cell-fdm {
+      grid-column: 3;
+      grid-row: 3;
+      margin-top: 15px;
+      min-height: 58px;
+    }
+    .stage-pill.is-clay {
+      background: var(--clay-soft);
+      border-color: var(--clay);
+      color: var(--clay);
+      font-weight: 600;
+    }
+    .stage-mini-fill.warn {
+      background: var(--clay);
+    }
+  </style>
+  <script src="../vendor/katex/katex.min.js?v=20261124g" defer></script>
+  <script src="../vendor/katex/auto-render.min.js?v=20261124g" defer></script>
+  <script src="math-init.js?v=20261124g" defer></script>
+  <script src="figure.js?v=20261124g" defer></script>
+  <script src="site.js?v=20261124g" defer></script>
+  <script>if(location.search.includes("embed=1"))document.documentElement.classList.add("is-embedded");</script>
+</head>
+<body>
+  <a class="skip" href="#main" data-i18n="skipMain">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap nav-bar">
+      <div class="brand-group">
+        <a class="studio-back" href="../../" data-studio-home data-i18n="backStudio">← Ziyi Ding</a>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <a class="brand" href="#main">
+          <img src="assets/mark.svg" alt="" />
+          <span>EgoLAM</span>
+        </a>
+      </div>
+      <nav class="nav-links" aria-label="Page sections">
+        <a href="#method" data-i18n="navMethod">Method</a>
+        <a href="#explorer" data-i18n="navResults">Benchmarks</a>
+        <a href="#figures" data-i18n="navFigures">Figures</a>
+        <a href="#cite" data-i18n="navCite">BibTeX</a>
+        <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Switch language">中文</button>
+        <a class="nav-pill" href="../../assets/papers/egolam.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="navPaper">Paper ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <div class="badges">
+          <span class="badge" data-i18n="statusBadge">Preprint · 2026</span>
+          <span class="badge badge--topic" data-i18n="topicBadge">Embodied AI · Egocentric Latent Actions</span>
+        </div>
+        <h1 data-i18n="heroHeading">Ego<span>LAM</span></h1>
+        <p class="subtitle" data-i18n="fullTitle">EgoLAM: Learning Latent Actions from Hand and Head Motion</p>
+
+        <div class="byline" aria-label="Authors">
+          <span class="self">Ziyi Ding<sup>1,3,*</sup></span>,
+          <span>Yiwei Wang<sup>2,*</sup></span>,
+          <span>Zhongxing Wei<sup>3</sup></span>,
+          <span>Xianxin Lai<sup>4</sup></span>,
+          <span>Yechi Liu<sup>5,9</sup></span>,
+          <span>Xiaodi Huang<sup>5</sup></span>,
+          <span>Jinghua Hou<sup>4</sup></span>,
+          <span>Xiaoquan Sun<sup>6</sup></span>,
+          <span>Haijier Chen<sup>7</sup></span>,
+          <span>Zhe Liu<sup>4</sup></span>,
+          <span>Yinan Chen<sup>8</sup></span>,
+          <span>Junqiao Zhao<sup>2,†</sup></span>,
+          <span>Xiao-Ping Zhang<sup>1,†</sup></span>,
+          <span>Jiayu Chen<sup>4,3,†</sup></span>
+        </div>
+        <p class="author-notes" data-i18n="authorNotes">* Equal contribution · † Corresponding authors.</p>
+        <details class="affiliations">
+          <summary data-i18n="affilSummary">Affiliations</summary>
+          <ol>
+            <li data-i18n="affil1">Tsinghua University</li>
+            <li data-i18n="affil2">Tongji University</li>
+            <li data-i18n="affil3">INFIFORCE</li>
+            <li data-i18n="affil4">The University of Hong Kong</li>
+            <li data-i18n="affil5">Institute of Automation, Chinese Academy of Sciences</li>
+            <li data-i18n="affil6">Huazhong University of Science and Technology</li>
+            <li data-i18n="affil7">Wuhan University</li>
+            <li data-i18n="affil8">Zhejiang University</li>
+            <li data-i18n="affil9">University of Chinese Academy of Sciences</li>
+          </ol>
+        </details>
+
+        <p class="lead" data-i18n="heroLead">
+          EgoLAM supervises latent actions with head-aligned 3D wrist motion and supplies camera motion separately to the forward model, extracting manipulation-faithful codes from two RGB frames alone.
+        </p>
+
+        <div class="action-row">
+          <a class="btn primary" href="../../assets/papers/egolam.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="btnPaper">Paper PDF ↗</a>
+          <a class="btn demo-highlight" href="https://dzyy123.github.io/EgoLAM-Pages/" target="_blank" rel="noreferrer" data-i18n="btnExplorer">Occlusion Explorer ↗</a>
+          <a class="btn" href="https://github.com/Dzyy123/EgoLAM" target="_blank" rel="noreferrer" data-i18n="btnCode">Code ↗</a>
+          <a class="btn" href="https://huggingface.co/dzyy123/EgoLAM" target="_blank" rel="noreferrer" data-i18n="btnWeights">Checkpoints ↗</a>
+        </div>
+      </div>
+
+      <!-- Interactive Method Stage -->
+      <figure class="stage-card" id="stage-figure">
+        <figcaption class="stage-head">
+          <div>
+            <span class="smallcap" data-i18n="stageEyebrow">Interactive Pipeline</span>
+            <h2 id="stage-card-title" data-i18n="stageTitle">Hand-pooled slots &amp; camera-disentangled $z_t$</h2>
+          </div>
+          <div class="stage-mode" role="group" aria-label="View regime">
+            <button type="button" data-regime="clean" aria-pressed="false" data-i18n="modeClean">Clean View</button>
+            <button type="button" data-regime="occlusion" aria-pressed="true" data-i18n="modeOcclusion">Peak Occlusion</button>
+          </div>
+        </figcaption>
+
+        <div class="stage-canvas">
+          <div class="stage-board" id="stage-board">
+            <svg id="fig-stage" class="stage-svg" aria-hidden="true"></svg>
+            <div id="stage-nodes"></div>
+          </div>
+        </div>
+
+        <div class="stage-transport">
+          <div class="step-pills" id="chapter-pills" role="group" aria-label="Pipeline stage"></div>
+          <button type="button" class="play-btn" id="stage-play">Play</button>
+        </div>
+
+        <div class="stage-caption" aria-live="polite" aria-atomic="true">
+          <strong id="stage-heading">Loading…</strong>
+          <p id="stage-detail"></p>
+        </div>
+      </figure>
+    </section>
+
+    <!-- Headline Metrics Band -->
+    <section class="metrics-band" aria-label="Key experimental highlights">
+      <div class="wrap metrics-grid">
+        <div>
+          <strong class="metric-val" data-i18n="metricVal1">79.38<span>%</span></strong>
+          <p data-i18n="metric1">Mean LIBERO closed-loop success ($+28.73$ pp over Expert BC; $+9.76$ pp over strongest competing LAM)</p>
+        </div>
+        <div>
+          <strong class="metric-val" data-i18n="metricVal2">0.534<span>3</span></strong>
+          <p data-i18n="metric2">Highest unseen 3D wrist-motion decoding $R^2$ among 8 models at $1{,}180.45$ cached pairs/s</p>
+        </div>
+        <div>
+          <strong class="metric-val" data-i18n="metricVal3">17°<span> vs. 126°</span></strong>
+          <p data-i18n="metric3">Acting-hand 3D direction error vs. LAPA on cup lift ($0.767$ IC-camera, $0.170$ IC-photo)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Method Pillars -->
+    <section class="wrap section" id="method">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="methodKicker">Three-Part Design</span>
+          <h2 data-i18n="methodHeading">Preserve wrist manipulation while factoring out observer head motion.</h2>
+        </div>
+      </div>
+
+      <div class="pillars-grid">
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p1Num">01 · Hand Queries</span>
+          <h3 data-i18n="p1Title">Slot Pooling &amp; 3D Wrist Readout</h3>
+          <p data-i18n="p1Body">
+            Left- and right-hand queries pool 8 frozen DINOv2 object slots across $(o_t, o_{t+\Delta})$; a bottleneck head supervises 3D wrist translation and rotation $a_t$ in the earlier head frame.
+          </p>
+          <div class="eq-box">$$z_t = f_\theta(q_{t+\Delta} - q_t), \qquad \mathcal{L}_{\mathrm{action}} = \operatorname{MSE}_{\mathrm{valid}}\!\big(g_{\mathrm{hand}}(z_t),\, a_t\big)$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p2Num">02 · Disentanglement</span>
+          <h3 data-i18n="p2Title">Head-Conditioned FDM &amp; GRL</h3>
+          <p data-i18n="p2Body">
+            Measured camera motion $n_t$ explains apparent shifts in the forward model, while gradient reversal and synthetic 2D warps ($\mathcal{L}_{\mathrm{inv}}$) suppress camera leakage in $z_t$.
+          </p>
+          <div class="eq-box">$$\hat{S}_{t+\Delta} = \operatorname{FDM}(S_t, z_t, n_t), \qquad \hat{n}_t = g_{\mathrm{cam}}\!\big(\operatorname{GRL}(z_t)\big)$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p3Num">03 · Imitation</span>
+          <h3 data-i18n="p3Title">RGB-Only Extraction &amp; Policy</h3>
+          <p data-i18n="p3Body">
+            Inference extracts $z_t$ from two RGB frames without pose labels. Policies pretrain on frozen teacher codes $\tilde{z}_t$ before joint 7-DoF control fine-tuning.
+          </p>
+          <div class="eq-box">$$\hat{u}_t = D_\psi\!\big(\pi_\phi(o_{\le t})\big), \qquad \mathcal{L}_{\mathrm{ctrl}} = \ell_a(\hat{u}_t, u_t)$$</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Interactive Benchmark Explorer -->
+    <section class="section section--alt" id="explorer">
+      <div class="wrap">
+        <div class="section-header">
+          <div>
+            <span class="smallcap" data-i18n="expKicker">Benchmarks · Tables 1–4</span>
+            <h2 data-i18n="expHeading">Closed-loop LIBERO control, wrist decoding &amp; visual interventions.</h2>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="wb-controls">
+            <div class="seg-group" id="mode-tabs" role="group" aria-label="Evaluation table">
+              <button type="button" data-mode="libero" aria-pressed="true" data-i18n="tabLibero">LIBERO Policy (Table 3)</button>
+              <button type="button" data-mode="diag" aria-pressed="false" data-i18n="tabDiag">Wrist AD &amp; Speed (Table 2)</button>
+              <button type="button" data-mode="lary" aria-pressed="false" data-i18n="tabLary">LARYBench (Table 1)</button>
+              <button type="button" data-mode="ablation" aria-pressed="false" data-i18n="tabAblation">Ablations (Table 4)</button>
+            </div>
+          </div>
+
+          <div class="wb-Subbar">
+            <div class="wb-legend" id="wb-legend"></div>
+            <div class="seg-group" id="submetric-tabs" role="group" aria-label="Metric selector"></div>
+          </div>
+
+          <div class="paired-list" id="paired-rows" aria-live="polite"></div>
+          <p class="wb-note" id="wb-takeaway"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authentic Paper Figures -->
+    <section class="wrap section" id="figures">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="figKicker">Paper Figures</span>
+          <h2 data-i18n="figHeading">Slot-query architecture, cached throughput &amp; occlusion sensitivity.</h2>
+        </div>
+      </div>
+
+      <div class="fig-grid">
+        <figure class="fig-card wide">
+          <button type="button" class="fig-thumb" data-lightbox="../../assets/research/egolam.webp" data-title="Figure 2 · EgoLAM Training &amp; RGB-Only Inference" data-caption="Stage 1 pretrains DINOv2 object slots ($\mathcal{L}_{\mathrm{feat}} + \mathcal{L}_{\mathrm{sim}}$); Stage 2 supervises hand-queried $z_t$ with wrist motion and camera-conditioned FDM; inference needs only $(o_t, o_{t+\Delta})$." data-title-zh="图 2 · EgoLAM 训练与双帧 RGB 推理架构" data-caption-zh="阶段一预训练 DINOv2 物体槽（$\mathcal{L}_{\mathrm{feat}} + \mathcal{L}_{\mathrm{sim}}$）；阶段二利用手腕运动监督手部查询编码 $z_t$ 并向 FDM 注入头部运动 $n_t$；推理仅需双帧 RGB 图像。">
+            <img src="../../assets/research/egolam.webp" alt="Figure 2: EgoLAM slot + hand/head motion architecture" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomHint1">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f2Meta">Figure 2 · Method Overview</span>
+              <a href="../../assets/papers/egolam.pdf#page=2" target="_blank" rel="noreferrer">p.2 ↗</a>
+            </div>
+            <h3 data-i18n="f2Title">Slot Pretraining, Hand-Supervised IDM &amp; Two-Frame Inference</h3>
+            <p data-i18n="f2Cap">Combines frozen DINOv2 slots, per-hand query pooling, 3D wrist-motion readout, and head-conditioned forward slot prediction.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig1-objectives.webp" data-title="Figure 1 · Training Objectives Under Cup Push &amp; Head Turn" data-caption="Pixel reconstruction (LAPA) and object-slot prediction (LAPO-Slots) conflate head turns with manipulation; EgoLAM anchors $z_t$ to wrist motion and routes head motion to the forward model." data-title-zh="图 1 · 推杯操作与转头视角变化下的三类训练目标" data-caption-zh="像素重建（LAPA）与纯物体槽预测（LAPO-Slots）易将转头伪运动混入潜动作；EgoLAM 将手腕运动锚定于 $z_t$，并将相机运动单独送入前向模型。">
+            <img src="assets/fig1-objectives.webp" alt="Figure 1: Pixel reconstruction vs slot prediction vs hand-supervised latent actions" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomHint2">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f1Meta">Figure 1</span>
+              <a href="../../assets/papers/egolam.pdf#page=1" target="_blank" rel="noreferrer">p.1 ↗</a>
+            </div>
+            <h3 data-i18n="f1Title">Why Pixels &amp; Slots Alone Confuse Head Turns</h3>
+            <p data-i18n="f1Cap">Separating wrist supervision from camera-conditioned slot prediction keeps $z_t$ near zero when only the wearer turns.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig7-efficiency.webp" data-title="Figure 7 · Unseen Action Decoding $R^2$ vs. Cached Throughput" data-caption="Single-thread FP32 throughput from cached features vs. unseen wrist-motion decoding $R^2$. EgoLAM achieves $R^2 = 0.534$ at $1{,}180.45$ pairs/s ($90.89\mathrm{M}$ full parameters)." data-title-zh="图 7 · 未见集手腕动作解码 $R^2$ 与缓存特征吞吐率对比" data-caption-zh="单线程 FP32 缓存特征吞吐率与未见集手腕运动解码 $R^2$：EgoLAM 以 $90.89\mathrm{M}$ 总参数量达到 $R^2 = 0.534$ 与 $1{,}180.45$ 对/秒。">
+            <img src="assets/fig7-efficiency.webp" alt="Figure 7: Unseen action decoding R2 vs cached throughput" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomHint3">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f7Meta">Figure 7</span>
+              <a href="../../assets/papers/egolam.pdf#page=7" target="_blank" rel="noreferrer">p.7 ↗</a>
+            </div>
+            <h3 data-i18n="f7Title">Action Decoding $R^2$ vs. Cached Throughput</h3>
+            <p data-i18n="f7Cap">Reaches $R^2 = 0.534$ at $1{,}180.45$ cached pairs/s ($0.85\,\mathrm{ms}$ single-pair latency, $1.35\mathrm{M}$ action branch).</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card wide">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig8-occlusion.webp" data-title="Figure 8 · Peak Occlusion Windows &amp; 3D Wrist Direction Error" data-caption="(a) Sliding $5 \times 5$ occlusion windows show EgoLAM responds most strongly to masking the acting left hand. (b) Decoded 3D wrist direction error is $17^\circ$ for EgoLAM vs. $41^\circ\text{–}126^\circ$ across five baselines." data-title-zh="图 8 · 遮挡敏感度峰值窗口与三维手腕运动方向误差" data-caption-zh="(a) $5 \times 5$ 滑动遮挡实验表明 EgoLAM 对遮挡操作左手响应最强；(b) 解码出的三维手腕位移方向误差仅为 $17^\circ$（五个对比基线为 $41^\circ\text{–}126^\circ$）。">
+            <img src="assets/fig8-occlusion.webp" alt="Figure 8: Peak occlusion sensitivity and wrist direction alignment" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomHint4">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f8Meta">Figure 8 · Occlusion Analysis</span>
+              <a href="../../assets/papers/egolam.pdf#page=8" target="_blank" rel="noreferrer">p.8 ↗</a>
+            </div>
+            <h3 data-i18n="f8Title">Peak Occlusion Sensitivity &amp; $17^\circ$ Wrist Alignment</h3>
+            <p data-i18n="f8Cap">Concentrates occlusion sensitivity on the acting hand and recovers 3D lift direction within $17^\circ$ vs. $126^\circ$ for LAPA and $103^\circ$ for GeoLAM.</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Scope, Citation & Sibling Pages -->
+    <section class="wrap section" id="cite">
+      <div class="split-grid">
+        <div class="scope-box">
+          <span class="smallcap" data-i18n="scopeKicker">Scope &amp; Boundaries</span>
+          <h3 data-i18n="scopeTitle">Supervision &amp; real-turn diagnostics</h3>
+          <p data-i18n="scopeP1">
+            <strong>Train-only pose labels, RGB-only deployment:</strong> Stage 2 uses EgoVerse wrist/camera poses and hand keypoints where available ($1{,}056.9\,\mathrm{h}$ LAM pool), while inference and policy labeling require only two RGB frames $(o_t, o_{t+\Delta})$.
+          </p>
+          <p data-i18n="scopeP2">
+            <strong>Real head turns &amp; batching:</strong> On matched EgoVerse clips with large head turns ($\ge 15^\circ$), EgoLAM curbs wrist translation error growth relative to LAPA ($+2.75$ vs. $+6.80\,\mathrm{cm}$ held-out), whereas rotation contrasts span zero; single-pair cached latency leads ($0.85$ vs. $1.47\,\mathrm{ms}$), while LAOM is faster at batch size $32$ ($8.42$ vs. $10.50\,\mathrm{ms}$).
+          </p>
+        </div>
+
+        <div class="bib-card">
+          <div class="bib-head">
+            <span data-i18n="bibTitle">BibTeX · Preprint 2026</span>
+            <button type="button" class="copy-btn" id="copy-bib">Copy BibTeX</button>
+          </div>
+          <pre id="bib-text">@article{ding2026egolam,
+  title   = {EgoLAM: Learning Latent Actions from Hand and Head Motion},
+  author  = {Ding, Ziyi and Wang, Yiwei and Wei, Zhongxing and Lai, Xianxin and Liu, Yechi and Huang, Xiaodi and Hou, Jinghua and Sun, Xiaoquan and Chen, Haijier and Liu, Zhe and Chen, Yinan and Zhao, Junqiao and Zhang, Xiao-Ping and Chen, Jiayu},
+  journal = {Preprint},
+  year    = {2026},
+  url     = {https://dzyy123.github.io/EgoLAM-Pages/}
+}</pre>
+        </div>
+      </div>
+
+      <div class="sibling-nav" aria-label="Companion research pages">
+        <span class="smallcap" data-i18n="morePages">Companion Research Pages</span>
+        <div class="sibling-grid">
+          <a class="sibling-card" href="./" aria-current="page">
+            <span data-i18n="sib1Tag">Preprint · 2026</span>
+            <strong data-i18n="sib1Title">EgoLAM</strong>
+            <p data-i18n="sib1Desc">Latent actions from hand &amp; head motion.</p>
+          </a>
+          <a class="sibling-card" href="../traj-lewm/" data-sibling="traj-lewm">
+            <span data-i18n="sib2Tag">arXiv 2026</span>
+            <strong data-i18n="sib2Title">Traj-LeWM</strong>
+            <p data-i18n="sib2Desc">Path-aware planning via trajectory cost.</p>
+          </a>
+          <a class="sibling-card" href="../causalvae/" data-sibling="causalvae">
+            <span data-i18n="sib3Tag">ECCV 2026</span>
+            <strong data-i18n="sib3Title">CausalVAE Plug-in</strong>
+            <p data-i18n="sib3Desc">Causal DAG layer for world models.</p>
+          </a>
+          <a class="sibling-card" href="../icd/" data-sibling="icd">
+            <span data-i18n="sib4Tag">arXiv 2026</span>
+            <strong data-i18n="sib4Title">Intervene, Calibrate, Discover</strong>
+            <p data-i18n="sib4Desc">Calibrated causal structure from pixels.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-row">
+      <span data-i18n="footAuthor">Ziyi Ding (丁子毅) · Tsinghua University</span>
+      <div>
+        <a href="../../" data-studio-home data-i18n="footStudio">Research Studio</a> ·
+        <a href="https://scholar.google.com/citations?user=1KeE6PsAAAAJ" target="_blank" rel="noreferrer">Scholar</a> ·
+        <a href="https://github.com/Dzyy123" target="_blank" rel="noreferrer">GitHub</a> ·
+        <a href="#main" data-i18n="footTop">Top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox" aria-label="Figure viewer">
+    <div class="lb-head">
+      <strong id="lb-title">Figure</strong>
+      <button type="button" class="lb-close" id="lb-close" data-i18n="lbClose">Close (Esc)</button>
+    </div>
+    <div class="lb-body">
+      <img id="lb-img" src="" alt="" />
+    </div>
+    <div class="lb-cap" id="lb-cap"></div>
+  </dialog>
+</body>
+</html>

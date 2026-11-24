@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f2efe8" />
+  <title>Intervene, Calibrate, Discover · Learning Causal Structure from Pixels</title>
+  <meta name="description" content="Intervene, Calibrate, Discover: Learning Causal Structure from Pixels (arXiv:2610.34711)." />
+  <link rel="icon" type="image/svg+xml" href="assets/mark.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css?v=20261124g" />
+  <link rel="stylesheet" href="site.css?v=20261124g" />
+  <style>
+    .btn.demo-highlight {
+      background: #e4ede1;
+      border-color: var(--accent);
+      color: var(--accent-deep);
+      font-weight: 600;
+    }
+    .btn.demo-highlight:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+    .icd-grid {
+      display: grid;
+      grid-template-columns: minmax(98px, 0.92fr) minmax(126px, 1.12fr) minmax(126px, 1.12fr) minmax(118px, 1.06fr);
+      grid-template-rows: auto auto auto;
+      column-gap: 18px;
+      row-gap: 0;
+      align-items: stretch;
+    }
+    .icd-pill-cal {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: center;
+      margin-bottom: 15px;
+    }
+    .icd-pill-graph {
+      grid-column: 3;
+      grid-row: 1;
+      justify-self: center;
+      margin-bottom: 15px;
+    }
+    .icd-cell-pix {
+      grid-column: 1;
+      grid-row: 2;
+      min-height: 68px;
+    }
+    .icd-cell-cal {
+      grid-column: 2;
+      grid-row: 2;
+      min-height: 68px;
+    }
+    .icd-cell-dag {
+      grid-column: 3;
+      grid-row: 2;
+      min-height: 68px;
+    }
+    .icd-cell-cf {
+      grid-column: 4;
+      grid-row: 2;
+      min-height: 68px;
+    }
+    .icd-cell-unit {
+      grid-column: 2;
+      grid-row: 3;
+      margin-top: 15px;
+      min-height: 58px;
+    }
+    .icd-cell-res {
+      grid-column: 3;
+      grid-row: 3;
+      margin-top: 15px;
+      min-height: 58px;
+    }
+    .stage-pill.is-clay {
+      background: var(--clay-soft);
+      border-color: var(--clay);
+      color: var(--clay);
+      font-weight: 600;
+    }
+    .stage-mini-fill.warn {
+      background: var(--clay);
+    }
+  </style>
+  <script src="../vendor/katex/katex.min.js?v=20261124g" defer></script>
+  <script src="../vendor/katex/auto-render.min.js?v=20261124g" defer></script>
+  <script src="math-init.js?v=20261124g" defer></script>
+  <script src="figure.js?v=20261124g" defer></script>
+  <script src="site.js?v=20261124g" defer></script>
+  <script>if(location.search.includes("embed=1"))document.documentElement.classList.add("is-embedded");</script>
+</head>
+<body>
+  <a class="skip" href="#main" data-i18n="skipMain">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap nav-bar">
+      <div class="brand-group">
+        <a class="studio-back" href="../../" data-studio-home data-i18n="backStudio">← Ziyi Ding</a>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <a class="brand" href="#main">
+          <img src="assets/mark.svg" alt="" />
+          <span>ICD</span>
+        </a>
+      </div>
+      <nav class="nav-links" aria-label="Page sections">
+        <a href="#method" data-i18n="navMethod">Method</a>
+        <a href="#explorer" data-i18n="navResults">Benchmarks</a>
+        <a href="#figures" data-i18n="navFigures">Figures</a>
+        <a href="#cite" data-i18n="navCite">BibTeX</a>
+        <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Switch language">中文</button>
+        <a class="nav-pill" href="../../assets/papers/intervene-calibrate-discover.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="navPaper">Paper ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <div class="badges">
+          <span class="badge badge--accepted" data-i18n="statusBadge">arXiv:2610.34711</span>
+          <span class="badge badge--topic" data-i18n="topicBadge">Causal Discovery · World Models · Embodied AI</span>
+        </div>
+        <h1 data-i18n="heroHeading">Intervene, <span>Calibrate</span>, Discover</h1>
+        <p class="subtitle" data-i18n="fullTitle">Intervene, Calibrate, Discover: Learning Causal Structure from Pixels</p>
+
+        <div class="byline" aria-label="Authors">
+          <span class="self">Ziyi Ding<sup>1,5,*</sup></span>,
+          <span>Xiaodi Huang<sup>2,*</sup></span>,
+          <span>Xianxin Lai<sup>3,5</sup></span>,
+          <span>Haijier Chen<sup>4,5</sup></span>,
+          <span>Zhang Zhang<sup>2</sup></span>,
+          <span>Xiao-Ping Zhang<sup>1,†</sup></span>,
+          <span>Jiayu Chen<sup>3,5,†</sup></span>
+        </div>
+        <p class="author-notes" data-i18n="authorNotes">* Equal contribution · † Corresponding authors.</p>
+        <details class="affiliations">
+          <summary data-i18n="affilSummary">Affiliations</summary>
+          <ol>
+            <li data-i18n="affil1">Tsinghua University</li>
+            <li data-i18n="affil2">Institute of Automation, Chinese Academy of Sciences</li>
+            <li data-i18n="affil3">The University of Hong Kong</li>
+            <li data-i18n="affil4">Wuhan University</li>
+            <li data-i18n="affil5">INFIFORCE Intelligent Technology, China</li>
+          </ol>
+        </details>
+
+        <p class="lead" data-i18n="heroLead">
+          With encoder and decoder frozen, ICD calibrates pixel readouts to verified intervention values, actively orients causal edges, and maps counterfactual states back via $T^{-1}$ for pixel decoding.
+        </p>
+
+        <div class="action-row">
+          <a class="btn primary" href="../../assets/papers/intervene-calibrate-discover.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="btnPaper">Paper PDF ↗</a>
+          <a class="btn demo-highlight" href="https://dzyy123.github.io/intervene-calibrate-discover/" target="_blank" rel="noreferrer" data-i18n="btnDemos">Interactive Demos ↗</a>
+          <a class="btn" href="https://arxiv.org/abs/2610.34711" target="_blank" rel="noreferrer" data-i18n="btnArxiv">arXiv ↗</a>
+          <a class="btn" href="https://github.com/Dzyy123/icd-physical-demos" target="_blank" rel="noreferrer" data-i18n="btnCode">Code ↗</a>
+        </div>
+      </div>
+
+      <!-- Interactive Method Stage -->
+      <figure class="stage-card" id="stage-figure">
+        <figcaption class="stage-head">
+          <div>
+            <span class="smallcap" data-i18n="stageEyebrow">Interactive Pipeline</span>
+            <h2 id="stage-card-title" data-i18n="stageTitle">Invertible calibration $T$ &amp; active $\hat{G}$ discovery</h2>
+          </div>
+          <div class="stage-mode" role="group" aria-label="Calibration regime">
+            <button type="button" data-regime="calibrated" aria-pressed="true" data-i18n="modeCalibrated">Calibrated ICD</button>
+            <button type="button" data-regime="uncalibrated" aria-pressed="false" data-i18n="modeUncalibrated">Uncalibrated</button>
+          </div>
+        </figcaption>
+
+        <div class="stage-canvas">
+          <div class="stage-board" id="stage-board">
+            <svg id="fig-stage" class="stage-svg" aria-hidden="true"></svg>
+            <div id="stage-nodes"></div>
+          </div>
+        </div>
+
+        <div class="stage-transport">
+          <div class="step-pills" id="chapter-pills" role="group" aria-label="Pipeline stage"></div>
+          <button type="button" class="play-btn" id="stage-play">Play</button>
+        </div>
+
+        <div class="stage-caption" aria-live="polite" aria-atomic="true">
+          <strong id="stage-heading">Loading…</strong>
+          <p id="stage-detail"></p>
+        </div>
+      </figure>
+    </section>
+
+    <!-- Headline Metrics Band -->
+    <section class="metrics-band" aria-label="Key experimental highlights">
+      <div class="wrap metrics-grid">
+        <div>
+          <strong class="metric-val" data-i18n="metricVal1">0<span> SHD</span></strong>
+          <p data-i18n="metric1">Exact graph recovery on Physical Domino ($0.982$ AUPRC) &amp; Pick-and-Place ($0.862$); best AUPRC in 7/8 columns</p>
+        </div>
+        <div>
+          <strong class="metric-val" data-i18n="metricVal2">8 / 8<span> Tasks</span></strong>
+          <p data-i18n="metric2">Lowest conditional non-target consequence NMSE $(\times 10^3)$ across all 8 benchmark columns (Table 3)</p>
+        </div>
+        <div>
+          <strong class="metric-val" data-i18n="metricVal3">7 / 8<span> Tasks</span></strong>
+          <p data-i18n="metric3">Lowest counterfactual RGB MSE $(\times 10^{-3})$, including $-68.6\%$ vs. CausalVAE on Pick-and-Place (Table 4)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Method Pillars -->
+    <section class="wrap section" id="method">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="methodKicker">Three-Stage Workflow</span>
+          <h2 data-i18n="methodHeading">Align intervention units before orienting edges and fitting mechanisms.</h2>
+        </div>
+      </div>
+
+      <div class="pillars-grid">
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p1Num">01 · Calibration</span>
+          <h3 data-i18n="p1Title">Dimension-Wise Invertible Map $T$</h3>
+          <p data-i18n="p1Body">
+            Keep $E_\theta$ and $D_\psi$ frozen; fit a strictly monotone map $T_{\phi,j}$ from round-robin verified targets ($B_{\mathrm{cal}}$) so visual readouts $h(x)$ match command units $q_j(u)$.
+          </p>
+          <div class="eq-box">$$h(x) = \frac{T(E_\theta(x)) - \mu^c}{\sigma^c}, \qquad g_j > \sum_{l=1}^{L}|w_{jl}|$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p2Num">02 · Discovery</span>
+          <h3 data-i18n="p2Title">Active CPDAG Orientation</h3>
+          <p data-i18n="p2Body">
+            Freeze $T$, estimate an observational CPDAG on $h(\mathcal{D}_{\mathrm{obs}})$, and target incident unoriented edges ($B_{\mathrm{graph}}$) to resolve direction before Meek propagation.
+          </p>
+          <div class="eq-box">$$e_{j \to k} = \big|\operatorname{Corr}(h_j, h_k;\, \mathcal{I}_j)\big|, \qquad B = B_{\mathrm{cal}} + B_{\mathrm{graph}}$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p3Num">03 · Counterfactuals</span>
+          <h3 data-i18n="p3Title">Residual-Fixed $T^{-1}$ Decoding</h3>
+          <p data-i18n="p3Body">
+            Hold factual residuals $\eta_j^{\mathrm{fact}}$ fixed, propagate $q_j(u)$ to descendants along $\hat{G}$, and invert calibration via $T^{-1}$ back to decoder coordinates.
+          </p>
+          <div class="eq-box">$$\hat{x}^{\mathrm{cf}} = D_\psi\!\Big(T^{-1}\!\big(\sigma^c \odot h^{\mathrm{cf}} + \mu^c\big)\Big)$$</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Interactive Benchmark Explorer -->
+    <section class="section section--alt" id="explorer">
+      <div class="wrap">
+        <div class="section-header">
+          <div>
+            <span class="smallcap" data-i18n="expKicker">Benchmarks · Tables 1–4</span>
+            <h2 data-i18n="expHeading">Graph discovery, calibrated effects, and pixel counterfactuals.</h2>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="wb-controls">
+            <div class="seg-group" id="mode-tabs" role="group" aria-label="Evaluation table">
+              <button type="button" data-mode="graph" aria-pressed="true" data-i18n="tabGraph">Graph Discovery (Table 1)</button>
+              <button type="button" data-mode="conseq" aria-pressed="false" data-i18n="tabConseq">Consequences (Table 3)</button>
+              <button type="button" data-mode="cfrgb" aria-pressed="false" data-i18n="tabRGB">CF Images (Table 4)</button>
+              <button type="button" data-mode="calib" aria-pressed="false" data-i18n="tabCalib">Calibration Control (Table 2)</button>
+            </div>
+
+            <div class="seg-group" id="domain-tabs" role="group" aria-label="Benchmark environment">
+              <button type="button" data-domain="Domino Phys." aria-pressed="true" data-i18n="domPhys">Domino Phys.</button>
+              <button type="button" data-domain="Domino SCM" aria-pressed="false" data-i18n="domSCM">Domino SCM</button>
+              <button type="button" data-domain="PnP" aria-pressed="false" data-i18n="domPnP">Pick &amp; Place</button>
+              <button type="button" data-domain="Balance" aria-pressed="false" data-i18n="domBal">Balance</button>
+              <button type="button" data-domain="Gears" aria-pressed="false" data-i18n="domGears">Gears</button>
+              <button type="button" data-domain="Spring" aria-pressed="false" data-i18n="domSpring">Spring</button>
+              <button type="button" data-domain="Seesaw" aria-pressed="false" data-i18n="domSeesaw">Seesaw</button>
+              <button type="button" data-domain="CausalWorld" aria-pressed="false" data-i18n="domCW">CausalWorld</button>
+            </div>
+          </div>
+
+          <div class="wb-Subbar">
+            <div class="wb-legend" id="wb-legend"></div>
+            <div class="seg-group" id="submetric-tabs" role="group" aria-label="Metric selector"></div>
+          </div>
+
+          <div class="paired-list" id="paired-rows" aria-live="polite"></div>
+          <p class="wb-note" id="wb-takeaway"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authentic Paper Figures -->
+    <section class="wrap section" id="figures">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="figKicker">Paper Figures</span>
+          <h2 data-i18n="figHeading">Three-stage architecture, visual domains &amp; counterfactual rollouts.</h2>
+        </div>
+      </div>
+
+      <div class="fig-grid">
+        <figure class="fig-card wide">
+          <button type="button" class="fig-thumb" data-lightbox="../../assets/research/intervene-calibrate-discover-method.webp" data-title="Figure 3 · Three-Stage ICD Workflow" data-caption="Frozen visual interface and invertible calibration $T$ precede active edge orientation and local mechanism fitting." data-title-zh="图 3 · ICD 三阶段学习与评测流程" data-caption-zh="在主动干预定向与局部机制拟合之前，先冻结视觉编解码器并完成可逆读出校准 $T$。">
+            <img src="../../assets/research/intervene-calibrate-discover-method.webp" alt="Figure 3: Three-stage ICD workflow" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomHint">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f3Meta">Figure 3 · Method Overview</span>
+              <a href="../../assets/papers/intervene-calibrate-discover.pdf#page=4" target="_blank" rel="noreferrer">p.4 ↗</a>
+            </div>
+            <h3 data-i18n="f3Title">Frozen Calibration, Active Discovery &amp; Mechanism Fitting</h3>
+            <p data-i18n="f3Cap">Separates invertible readout calibration ($B_{\mathrm{cal}}$) from active CPDAG orientation ($B_{\mathrm{graph}}$) so commands, graphs, and mechanisms share coordinates.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="../../assets/research/intervene-calibrate-discover-environments.webp" data-title="Figure 4 · Visual Physical Environments" data-caption="Controlled MEC scenes and generating graphs for Pick-and-Place, Balance, and Gears, alongside CAUSAL3D Spring/Seesaw and CausalWorld." data-title-zh="图 4 · 视觉物理评测环境与真实因果图" data-caption-zh="上方为 Pick-and-Place、Balance 与 Gears 的受控 MEC 场景及生成因果图；下方为 CAUSAL3D（Spring、Seesaw）与 CausalWorld 示例。">
+            <img src="../../assets/research/intervene-calibrate-discover-environments.webp" alt="Figure 4: Visual physical environments and ground-truth graphs" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomHint2">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f4Meta">Figure 4</span>
+              <a href="../../assets/papers/intervene-calibrate-discover.pdf#page=7" target="_blank" rel="noreferrer">p.7 ↗</a>
+            </div>
+            <h3 data-i18n="f4Title">Six Visual Benchmark Families</h3>
+            <p data-i18n="f4Cap">Spans Pick-and-Place, Balance, Gears, Domino, CAUSAL3D (Spring &amp; Seesaw), and CausalWorld.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig1-domino.webp" data-title="Figure 1 · Domino Intervention &amp; Graph Mutilation" data-caption="Releasing domino 2 from a $20^\circ$ tilt vs. structural intervention $\mathrm{do}(s_3 = u)$ removing incoming parent edges in the 7-node SCM." data-title-zh="图 1 · 多米诺场景干预与结构因果图截断" data-caption-zh="释放倾斜 $20^\circ$ 的第二块骨牌，对应七节点结构因果模型中切断父节点入边的硬干预 $\mathrm{do}(s_3 = u)$。">
+            <img src="assets/fig1-domino.webp" alt="Figure 1: Domino factual vs intervention graph mutilation" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomHint3">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f1Meta">Figure 1</span>
+              <a href="../../assets/papers/intervene-calibrate-discover.pdf#page=2" target="_blank" rel="noreferrer">p.2 ↗</a>
+            </div>
+            <h3 data-i18n="f1Title">Factual Scene vs. $\mathrm{do}(s_3 = u)$ Mutilation</h3>
+            <p data-i18n="f1Cap">Hard intervention replaces only the target mechanism and removes incoming parent edges before downstream propagation.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig5-counterfactual.webp" data-title="Figure 5 · Counterfactual Query &amp; RGB Error Maps" data-caption="(A) Schematic of calibrated residual-preserving decoding via $T^{-1}$. (B) Physical domino comparison ($F_1 = 1$) with shared-scale RGB error maps." data-title-zh="图 5 · 反事实查询路径与像素误差热力图" data-caption-zh="(A) 固定事实残差并经 $T^{-1}$ 逆校准解码；(B) 物理多米诺倾倒干预（$F_1 = 1$）下与真值重放的像素绝对误差对比。">
+            <img src="assets/fig5-counterfactual.webp" alt="Figure 5: Counterfactual rollouts and RGB error maps" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomHint4">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f5Meta">Figure 5</span>
+              <a href="../../assets/papers/intervene-calibrate-discover.pdf#page=10" target="_blank" rel="noreferrer">p.10 ↗</a>
+            </div>
+            <h3 data-i18n="f5Title">Counterfactual Rollouts &amp; RGB Error Maps</h3>
+            <p data-i18n="f5Cap">Compares predicted counterfactual domino cascades ($F_1 = 1$) and shared-scale absolute pixel error against simulator replay.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig2-queries.webp" data-title="Figure 2 · Positioning Intervention-Value Queries" data-caption="Joint intersection of pixel causal representations, feedback-driven experiments, and explicit causal structure discovery." data-title-zh="图 2 · 像素级干预数值查询的研究定位" data-caption-zh="处于像素因果表征学习、反馈驱动主动实验与显式因果结构发现三者的交叉区域。">
+            <img src="assets/fig2-queries.webp" alt="Figure 2: Positioning among causal representation, active experimentation and discovery" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomHint5">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f2Meta">Figure 2</span>
+              <a href="../../assets/papers/intervene-calibrate-discover.pdf#page=2" target="_blank" rel="noreferrer">p.2 ↗</a>
+            </div>
+            <h3 data-i18n="f2Title">Positioning Intervention-Value Queries</h3>
+            <p data-i18n="f2Cap">Connects visual causal representations, active target selection, and explicit DAG discovery in verified environment units.</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Scope, Citation & Sibling Pages -->
+    <section class="wrap section" id="cite">
+      <div class="split-grid">
+        <div class="scope-box">
+          <span class="smallcap" data-i18n="scopeKicker">Scope &amp; Controls</span>
+          <h3 data-i18n="scopeTitle">Assumptions &amp; conditional evaluation</h3>
+          <p data-i18n="scopeP1">
+            <strong>Known node semantics &amp; executed queries:</strong> Concept labels anchor node identities during encoder pretraining without revealing $G^\star$. Tables 3–4 score conditional errors on executable queries rather than pooled end-to-end rates, while Table 2 isolates calibration on a matched 3-seed Domino cohort sharing $E_\theta$, $\hat{G}$, and $D'$.
+          </p>
+          <p data-i18n="scopeP2">
+            <strong>Readout error vs. causal effect:</strong> Better state-readout MSE alone does not guarantee better intervention predictions—ordinary joint updating lowers readout MSE ($11.36$ vs. $12.86$) while degrading amplitude-shift counterfactual effect NMSE ($20.45$ vs. $6.52$).
+          </p>
+        </div>
+
+        <div class="bib-card">
+          <div class="bib-head">
+            <span data-i18n="bibTitle">BibTeX · arXiv Preprint</span>
+            <button type="button" class="copy-btn" id="copy-bib">Copy BibTeX</button>
+          </div>
+          <pre id="bib-text">@article{ding2026icd,
+  title   = {Intervene, Calibrate, Discover: Learning Causal Structure from Pixels},
+  author  = {Ding, Ziyi and Huang, Xiaodi and Lai, Xianxin and Chen, Haijier and Zhang, Zhang and Zhang, Xiao-Ping and Chen, Jiayu},
+  journal = {arXiv preprint arXiv:2610.34711},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2610.34711}
+}</pre>
+        </div>
+      </div>
+
+      <div class="sibling-nav" aria-label="Companion research pages">
+        <span class="smallcap" data-i18n="morePages">Companion Research Pages</span>
+        <div class="sibling-grid">
+          <a class="sibling-card" href="./" aria-current="page">
+            <span data-i18n="sib1Tag">arXiv 2026</span>
+            <strong data-i18n="sib1Title">Intervene, Calibrate, Discover</strong>
+            <p data-i18n="sib1Desc">Calibrated active causal discovery from pixels.</p>
+          </a>
+          <a class="sibling-card" href="../causalvae/" data-sibling="causalvae">
+            <span data-i18n="sib2Tag">ECCV 2026</span>
+            <strong data-i18n="sib2Title">CausalVAE Plug-in</strong>
+            <p data-i18n="sib2Desc">Causal DAG layer for world models.</p>
+          </a>
+          <a class="sibling-card" href="../egolam/" data-sibling="egolam">
+            <span data-i18n="sib3Tag">Preprint · 2026</span>
+            <strong data-i18n="sib3Title">EgoLAM</strong>
+            <p data-i18n="sib3Desc">Latent actions from hand &amp; head motion.</p>
+          </a>
+          <a class="sibling-card" href="../traj-lewm/" data-sibling="traj-lewm">
+            <span data-i18n="sib4Tag">arXiv 2026</span>
+            <strong data-i18n="sib4Title">Traj-LeWM</strong>
+            <p data-i18n="sib4Desc">Path-aware planning via trajectory cost.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-row">
+      <span data-i18n="footAuthor">Ziyi Ding (丁子毅) · Tsinghua University</span>
+      <div>
+        <a href="../../" data-studio-home data-i18n="footStudio">Research Studio</a> ·
+        <a href="https://scholar.google.com/citations?user=1KeE6PsAAAAJ" target="_blank" rel="noreferrer">Scholar</a> ·
+        <a href="https://github.com/Dzyy123" target="_blank" rel="noreferrer">GitHub</a> ·
+        <a href="#main" data-i18n="footTop">Top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox" aria-label="Figure viewer">
+    <div class="lb-head">
+      <strong id="lb-title">Figure</strong>
+      <button type="button" class="lb-close" id="lb-close" data-i18n="lbClose">Close (Esc)</button>
+    </div>
+    <div class="lb-body">
+      <img id="lb-img" src="" alt="" />
+    </div>
+    <div class="lb-cap" id="lb-cap"></div>
+  </dialog>
+</body>
+</html>

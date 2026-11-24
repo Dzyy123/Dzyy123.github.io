@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f2efe8" />
+  <title>SRD · State–Readout Decoupling for Latent World Models (Manuscript · 2027)</title>
+  <meta name="description" content="State–Readout Decoupling for Latent World Models (Manuscript · 2027)." />
+  <link rel="icon" type="image/svg+xml" href="assets/mark.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css?v=20261124g" />
+  <link rel="stylesheet" href="site.css?v=20261124g" />
+  <style>
+    .srd-grid {
+      display: grid;
+      grid-template-columns: minmax(104px, 0.94fr) repeat(3, minmax(112px, 1fr));
+      grid-template-rows: auto auto auto;
+      column-gap: 22px;
+      row-gap: 18px;
+      align-items: center;
+    }
+    .srd-act-1 { grid-column: 2; grid-row: 1; justify-self: center; }
+    .srd-act-2 { grid-column: 3; grid-row: 1; justify-self: center; }
+    .srd-act-3 { grid-column: 4; grid-row: 1; justify-self: center; }
+    .srd-zt    { grid-column: 1; grid-row: 2; min-height: 62px; }
+    .srd-s1    { grid-column: 2; grid-row: 2; min-height: 62px; }
+    .srd-s2    { grid-column: 3; grid-row: 2; min-height: 62px; }
+    .srd-s3    { grid-column: 4; grid-row: 2; min-height: 62px; }
+    .srd-tag   { grid-column: 1; grid-row: 3; justify-self: center; text-align: center; white-space: normal; line-height: 1.3; padding: 5px 9px; border-radius: 8px; }
+    .srd-tag.is-clay { background: var(--clay-soft); border-color: var(--clay); color: var(--clay); font-weight: 600; }
+    .srd-z1    { grid-column: 2; grid-row: 3; min-height: 58px; }
+    .srd-z2    { grid-column: 3; grid-row: 3; min-height: 58px; }
+    .srd-z3    { grid-column: 4; grid-row: 3; min-height: 58px; }
+  </style>
+  <script src="../vendor/katex/katex.min.js?v=20261124g" defer></script>
+  <script src="../vendor/katex/auto-render.min.js?v=20261124g" defer></script>
+  <script src="math-init.js?v=20261124g" defer></script>
+  <script src="figure.js?v=20261124g" defer></script>
+  <script src="site.js?v=20261124g" defer></script>
+  <script>if(location.search.includes("embed=1"))document.documentElement.classList.add("is-embedded");</script>
+</head>
+<body>
+  <a class="skip" href="#main" data-i18n="skipMain">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap nav-bar">
+      <div class="brand-group">
+        <a class="studio-back" href="../../" data-studio-home data-i18n="backStudio">← Ziyi Ding</a>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <a class="brand" href="#main">
+          <img src="assets/mark.svg" alt="" />
+          <span>SRD</span>
+        </a>
+      </div>
+      <nav class="nav-links" aria-label="Page sections">
+        <a href="#method" data-i18n="navMethod">Method</a>
+        <a href="#explorer" data-i18n="navResults">Benchmarks</a>
+        <a href="#figures" data-i18n="navFigures">Figures</a>
+        <a href="#cite" data-i18n="navCite">BibTeX</a>
+        <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Switch language">中文</button>
+        <a class="nav-pill" href="../../assets/papers/state-readout-decoupling.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="navPaper">Paper ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <div class="badges">
+          <span class="badge" data-i18n="statusBadge">Manuscript · 2027</span>
+          <span class="badge badge--topic" data-i18n="topicBadge">World Models · Latent Rollout</span>
+        </div>
+        <h1>State–<span>Readout</span> Decoupling</h1>
+        <p class="subtitle" data-i18n="fullTitle">State–Readout Decoupling for Latent World Models</p>
+
+        <div class="byline" aria-label="Authors">
+          <span>Xianxin Lai<sup>1</sup></span>,
+          <span class="self">Ziyi Ding<sup>2</sup></span>,
+          <span>Weiyu Chen<sup>1</sup></span>,
+          <span>Xiao-Ping Zhang<sup>2</sup></span>,
+          <span>Jiayu Chen<sup>1,3,&dagger;</sup></span>
+        </div>
+        <p class="author-notes" data-i18n="authorNotes">&dagger; Corresponding author.</p>
+        <details class="affiliations">
+          <summary data-i18n="affilSummary">Affiliations</summary>
+          <ol>
+            <li data-i18n="affil1">The University of Hong Kong</li>
+            <li data-i18n="affil2">Tsinghua Shenzhen International Graduate School, Tsinghua University</li>
+            <li data-i18n="affil3">INFIFORCE Intelligent Technology</li>
+          </ol>
+        </details>
+
+        <p class="lead" data-i18n="heroLead">
+          Autoregressive rollout reuses every predicted latent as the next transition input, compounding readout errors across steps. SRD advances a persistent hidden-state trajectory and projects planner latents without feeding them back.
+        </p>
+
+        <div class="action-row">
+          <a class="btn primary" href="../../assets/papers/state-readout-decoupling.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="btnPaper">Manuscript PDF ↗</a>
+          <a class="btn" href="https://agentic-intelligence-lab.org/files/SRD.pdf" target="_blank" rel="noreferrer" data-i18n="btnSource">Source PDF ↗</a>
+          <a class="btn" href="#explorer" data-i18n="btnBench">Benchmarks ↓</a>
+        </div>
+      </div>
+
+      <!-- Interactive Method Stage -->
+      <figure class="stage-card" id="stage-figure">
+        <figcaption class="stage-head">
+          <div>
+            <span class="smallcap" data-i18n="stageEyebrow">Interactive Rollout</span>
+            <h2 id="stage-card-title" data-i18n="stageTitle">Horizon hidden-state rollout vs. latent feedback</h2>
+          </div>
+          <div class="stage-mode" role="group" aria-label="Rollout formulation">
+            <button type="button" data-regime="srd" aria-pressed="true" data-i18n="modeSRD">SRD Rollout (Ours)</button>
+            <button type="button" data-regime="ar" aria-pressed="false" data-i18n="modeAR">Autoregressive (AR)</button>
+          </div>
+        </figcaption>
+
+        <div class="stage-canvas">
+          <div class="stage-board" id="stage-board">
+            <svg id="fig-stage" class="stage-svg" aria-hidden="true"></svg>
+            <div id="stage-nodes"></div>
+          </div>
+        </div>
+
+        <div class="stage-transport">
+          <div class="step-pills" id="chapter-pills" role="group" aria-label="Rollout step"></div>
+          <button type="button" class="play-btn" id="stage-play">Play</button>
+        </div>
+
+        <div class="stage-caption" aria-live="polite" aria-atomic="true">
+          <strong id="stage-heading">Loading…</strong>
+          <p id="stage-detail"></p>
+        </div>
+      </figure>
+    </section>
+
+    <!-- Headline Metrics Band -->
+    <section class="metrics-band" aria-label="Key experimental highlights">
+      <div class="wrap metrics-grid">
+        <div>
+          <strong class="metric-val">7 / 8<span data-i18n="m1Unit"> Settings</span></strong>
+          <p data-i18n="metric1">Higher goal-reaching success across LeWM &amp; PLDM on 4 visual control tasks</p>
+        </div>
+        <div>
+          <strong class="metric-val">+32<span> pp</span></strong>
+          <p data-i18n="metric2">TwoRoom advantage widens from +8 pp ($H = 5$) to +32 pp ($H = 20$: 14% $\to$ 46%)</p>
+        </div>
+        <div>
+          <strong class="metric-val">&minus;53–58<span data-i18n="m3Unit">% Params</span></strong>
+          <p data-i18n="metric3">Compact GRU predictor cuts mean evaluation time by 44% (&minus;86.8% at $H = 20$)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Method -->
+    <section class="wrap section" id="method">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="methodKicker">Decoupled Formulation</span>
+          <h2 data-i18n="methodHeading">Separate the recurrent rollout carrier from planner readouts.</h2>
+        </div>
+      </div>
+
+      <div class="pillars-grid">
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p1Num">01 · Coupling Diagnosis</span>
+          <h3 data-i18n="p1Title">Latent Readout Feedback</h3>
+          <p data-i18n="p1Body">
+            Autoregressive predictors feed $\hat{z}_{t+k} = z_{t+k}^{\mathrm{tgt}} + e_k$ back into $P_\phi$, propagating readout error via local Jacobians $J_k$.
+          </p>
+          <div class="eq-box">$$e_{k+1} \approx J_k e_k + \epsilon_k, \quad J_k = \left.\frac{\partial P_\phi(z, a_{t+k})}{\partial z}\right|_{z = z_{t+k}^{\mathrm{tgt}}}$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p2Num">02 · Rollout Carrier</span>
+          <h3 data-i18n="p2Title">Persistent Hidden Trajectory</h3>
+          <p data-i18n="p2Body">
+            Initialized via $h_{\mathrm{init}} = g_\phi(z_t)$, a GRU advances $h_{0:H-1}$ over action embeddings $u_k$ while $R_\phi$ projects $\hat{z}_{t+k+1}$ one-way.
+          </p>
+          <div class="eq-box">$$h_k = F_\phi(h_{k-1}, u_k), \qquad \hat{z}_{t+k+1} = R_\phi(h_k)$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p3Num">03 · Supervision</span>
+          <h3 data-i18n="p3Title">Horizon-Aligned Objective</h3>
+          <p data-i18n="p3Body">
+            Every readout along $h_{0:H-1}$ is supervised jointly across the planning horizon while retaining backbone losses $\mathcal{L}_{\mathrm{aux}}$.
+          </p>
+          <div class="eq-box">$$\mathcal{L} = \frac{1}{H}\sum_{k=1}^{H} \operatorname{MSE}\!\big(\hat{z}_{t+k},\, z_{t+k}^{\mathrm{tgt}}\big) + \mathcal{L}_{\mathrm{aux}}$$</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Interactive Benchmark Explorer -->
+    <section class="section section--alt" id="explorer">
+      <div class="wrap">
+        <div class="section-header">
+          <div>
+            <span class="smallcap" data-i18n="expKicker">Benchmarks · Tables 1–2 &amp; Horizon Diagnostics</span>
+            <h2 data-i18n="expHeading">AR vs. SRD &amp; SRD-AR under matched encoders and CEM planners.</h2>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="wb-controls">
+            <div class="seg-group" id="mode-tabs" role="group" aria-label="Evaluation table">
+              <button type="button" data-mode="main" aria-pressed="true" data-i18n="tabMain">Goal-Reaching (Table 1)</button>
+              <button type="button" data-mode="horizon" aria-pressed="false" data-i18n="tabHorizon">Long-Horizon TwoRoom (Fig. 2)</button>
+              <button type="button" data-mode="ablation" aria-pressed="false" data-i18n="tabAblation">Rollout Ablations (Table 2)</button>
+            </div>
+
+            <div class="seg-group" id="domain-tabs" role="group" aria-label="World model backbone">
+              <button type="button" data-domain="LeWM" aria-pressed="true">LeWM</button>
+              <button type="button" data-domain="PLDM" aria-pressed="false">PLDM</button>
+            </div>
+          </div>
+
+          <div class="wb-Subbar">
+            <div class="wb-legend" id="wb-legend"></div>
+            <div class="seg-group" id="submetric-tabs" role="group" aria-label="Metric selector"></div>
+          </div>
+
+          <div class="paired-list" id="paired-rows" aria-live="polite"></div>
+          <p class="wb-note" id="wb-takeaway"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authentic Figures -->
+    <section class="wrap section" id="figures">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="figKicker">Paper Figures</span>
+          <h2 data-i18n="figHeading">Rollout architecture &amp; TwoRoom horizon scaling.</h2>
+        </div>
+      </div>
+
+      <div class="fig-grid">
+        <figure class="fig-card wide">
+          <button type="button" class="fig-thumb" data-lightbox="../../assets/research/state-readout-decoupling.webp" data-title="Figure 1 · Autoregressive vs. SRD Rollout" data-caption="SRD replaces the recursive latent-feedback predictor with a horizon-level GRU state rollout and shared readout $R_\phi$, leaving encoder $f_\theta$, goal cost, and CEM planner unchanged.">
+            <img src="../../assets/research/state-readout-decoupling.webp" alt="Comparison of autoregressive rollout and SRD rollout in goal-conditioned MPC planning" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomFig">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f1Meta">Figure 1 · Planning Pipeline</span>
+              <a href="../../assets/papers/state-readout-decoupling.pdf#page=2" target="_blank" rel="noreferrer">p.2 ↗</a>
+            </div>
+            <h3 data-i18n="f1Title">Autoregressive vs. State–Readout-Decoupled Rollout</h3>
+            <p data-i18n="f1Cap">SRD swaps only the rollout module inside goal-conditioned CEM planning, removing recursive latent readout feedback while keeping encoder $f_\theta$ and goal scoring untouched.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card wide">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig2-tworoom.webp" data-title="Figure 2 · Long-Horizon Analysis on TwoRoom" data-caption="Across $H \in \{5, 10, 15, 20\}$, SRD and SRD-AR retain 46% success at $H = 20$ vs. 14% for AR, cut open-loop latent MSE by up to 37.3%, and reduce $H = 20$ runtime from 515 s to 68 s.">
+            <img src="assets/fig2-tworoom.webp" alt="TwoRoom horizon scaling: success rate, open-loop latent MSE, and evaluation time" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomFig2">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f2Meta">Figure 2 · Long-Horizon Stress Test</span>
+              <a href="../../assets/papers/state-readout-decoupling.pdf#page=7" target="_blank" rel="noreferrer">p.7 ↗</a>
+            </div>
+            <h3 data-i18n="f2Title">TwoRoom Horizon Scaling ($H \in \{5, 10, 15, 20\}$)</h3>
+            <p data-i18n="f2Cap">As planning horizon and goal distance grow jointly, SRD widens its success lead from +8 pp to +32 pp, lowers open-loop latent MSE (0.348 $\to$ 0.218 at step 65), and cuts $H = 20$ runtime by 86.8%.</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Scope, Citation & Sibling Pages -->
+    <section class="wrap section" id="cite">
+      <div class="split-grid">
+        <div class="scope-box">
+          <span class="smallcap" data-i18n="scopeKicker">Scope</span>
+          <h3 data-i18n="scopeTitle">Short-range contact vs. horizon stability</h3>
+          <p data-i18n="scopeP1">
+            <strong>Contact-rich trade-off:</strong> LeWM-PushT (94.67% $\to$ 87.33%) is the sole setting where SRD trails AR, reflecting PushT’s sensitivity to fine short-range contact pose; on PLDM-PushT, SRD gains +6.67 pp (84.67%) and SRD-AR reaches 89.33% (+11.33 pp).
+          </p>
+          <p data-i18n="scopeP2">
+            <strong>Optional local supervision:</strong> SRD-AR adds an auxiliary one-step loss $\lambda_{\mathrm{AR}}\mathcal{L}_{\mathrm{AR}}$ during training while keeping test-time rollout decoupled, peaking at 99.33% on PLDM-TwoRoom at extra training parameter cost.
+          </p>
+        </div>
+
+        <div class="bib-card">
+          <div class="bib-head">
+            <span data-i18n="bibHead">BibTeX · Manuscript 2027</span>
+            <button type="button" class="copy-btn" id="copy-bib">Copy BibTeX</button>
+          </div>
+          <pre id="bib-text">@unpublished{lai2027srd,
+  title  = {State--Readout Decoupling for Latent World Models},
+  author = {Lai, Xianxin and Ding, Ziyi and Chen, Weiyu and Zhang, Xiao-Ping and Chen, Jiayu},
+  note   = {Manuscript},
+  year   = {2027},
+  url    = {https://agentic-intelligence-lab.org/files/SRD.pdf}
+}</pre>
+        </div>
+      </div>
+
+      <div class="sibling-nav" aria-label="Companion research pages">
+        <span class="smallcap" data-i18n="morePages">Companion Research Pages</span>
+        <div class="sibling-grid">
+          <a class="sibling-card" href="./" aria-current="page">
+            <span data-i18n="sib1Tag">Manuscript · 2027</span>
+            <strong data-i18n="sib1Title">State–Readout Decoupling</strong>
+            <p data-i18n="sib1Desc">Horizon hidden-state rollout without readout feedback.</p>
+          </a>
+          <a class="sibling-card" href="../traj-lewm/" data-sibling="traj-lewm">
+            <span data-i18n="sib2Tag">arXiv 2026</span>
+            <strong>Traj-LeWM</strong>
+            <p data-i18n="sib2Desc">Path-aware planning via trajectory cost.</p>
+          </a>
+          <a class="sibling-card" href="../causalvae/" data-sibling="causalvae">
+            <span data-i18n="sib3Tag">ECCV 2026</span>
+            <strong data-i18n="sib3Title">CausalVAE Plug-in</strong>
+            <p data-i18n="sib3Desc">Causal DAG layer for world models.</p>
+          </a>
+          <a class="sibling-card" href="../georefiner/" data-sibling="georefiner">
+            <span data-i18n="sib4Tag">Manuscript · 2027</span>
+            <strong>GeoRefiner</strong>
+            <p data-i18n="sib4Desc">Geometry-conditioned VLA action refinement.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-row">
+      <span data-i18n="footAuthor">Ziyi Ding (丁子毅) · Tsinghua SIGS</span>
+      <div>
+        <a href="../../" data-studio-home data-i18n="footStudio">Research Studio</a> ·
+        <a href="https://scholar.google.com/citations?user=1KeE6PsAAAAJ" target="_blank" rel="noreferrer">Scholar</a> ·
+        <a href="https://github.com/Dzyy123" target="_blank" rel="noreferrer">GitHub</a> ·
+        <a href="#main" data-i18n="footTop">Top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox" aria-label="Figure viewer">
+    <div class="lb-head">
+      <strong id="lb-title">Figure</strong>
+      <button type="button" class="lb-close" id="lb-close" data-i18n="lbClose">Close (Esc)</button>
+    </div>
+    <div class="lb-body">
+      <img id="lb-img" src="" alt="" />
+    </div>
+    <div class="lb-cap" id="lb-cap"></div>
+  </dialog>
+</body>
+</html>

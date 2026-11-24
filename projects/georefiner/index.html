@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f2efe8" />
+  <title>GeoRefiner · Geometry-Conditioned Plug-and-Play Action Refinement for VLA Models (Manuscript · 2027)</title>
+  <meta name="description" content="GeoRefiner: Geometry-Conditioned Plug-and-Play Action Refinement for Vision-Language-Action Models (Manuscript · 2027)." />
+  <link rel="icon" type="image/svg+xml" href="assets/mark.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css?v=20261124g" />
+  <link rel="stylesheet" href="site.css?v=20261124g" />
+  <style>
+    .geo-grid {
+      display: grid;
+      grid-template-columns: minmax(112px, 1fr) minmax(126px, 1.08fr) minmax(124px, 1.06fr) minmax(122px, 1.05fr);
+      grid-template-rows: auto auto;
+      column-gap: 20px;
+      row-gap: 18px;
+      align-items: center;
+    }
+    .geo-vla  { grid-column: 1; grid-row: 1; min-height: 62px; }
+    .geo-nom  { grid-column: 2; grid-row: 1; min-height: 62px; }
+    .geo-skip { grid-column: 3; grid-row: 1; justify-self: center; align-self: center; }
+    .geo-obs  { grid-column: 1; grid-row: 2; min-height: 62px; }
+    .geo-enc  { grid-column: 2; grid-row: 2; min-height: 62px; }
+    .geo-ref  { grid-column: 3; grid-row: 2; min-height: 62px; }
+    .geo-out  { grid-column: 4; grid-row: 1 / 3; align-self: stretch; min-height: 142px; padding: 12px 10px; }
+    .stage-box.is-dim {
+      opacity: 0.46;
+      border-style: dashed;
+    }
+  </style>
+  <script src="../vendor/katex/katex.min.js?v=20261124g" defer></script>
+  <script src="../vendor/katex/auto-render.min.js?v=20261124g" defer></script>
+  <script src="math-init.js?v=20261124g" defer></script>
+  <script src="figure.js?v=20261124g" defer></script>
+  <script src="site.js?v=20261124g" defer></script>
+  <script>if(location.search.includes("embed=1"))document.documentElement.classList.add("is-embedded");</script>
+</head>
+<body>
+  <a class="skip" href="#main" data-i18n="skipMain">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap nav-bar">
+      <div class="brand-group">
+        <a class="studio-back" href="../../" data-studio-home data-i18n="backStudio">← Ziyi Ding</a>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <a class="brand" href="#main">
+          <img src="assets/mark.svg" alt="" />
+          <span>GeoRefiner</span>
+        </a>
+      </div>
+      <nav class="nav-links" aria-label="Page sections">
+        <a href="#method" data-i18n="navMethod">Method</a>
+        <a href="#explorer" data-i18n="navResults">Benchmarks</a>
+        <a href="#figures" data-i18n="navFigures">Figures</a>
+        <a href="#cite" data-i18n="navCite">BibTeX</a>
+        <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Switch language">中文</button>
+        <a class="nav-pill" href="../../assets/papers/georefiner.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="navPaper">Paper ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <div class="badges">
+          <span class="badge" data-i18n="statusBadge">Manuscript · 2027</span>
+          <span class="badge badge--topic" data-i18n="topicBadge">Embodied AI · VLA Action Refinement</span>
+        </div>
+        <h1>Geo<span>Refiner</span></h1>
+        <p class="subtitle" data-i18n="fullTitle">GeoRefiner: Geometry-Conditioned Plug-and-Play Action Refinement for Vision-Language-Action Models</p>
+
+        <div class="byline" aria-label="Authors">
+          <span>Haijier Chen<sup>1,2</sup></span>,
+          <span>Xiaoquan Sun<sup>1,3</sup></span>,
+          <span>Bo Chen<sup>1,3</sup></span>,
+          <span class="self">Ziyi Ding<sup>4</sup></span>,
+          <span>Jiahui Chen<sup>1,3</sup></span>,
+          <span>Jiarun Zhu<sup>1,3</sup></span>,
+          <span>Huanzhang Hu<sup>1,3</sup></span>,
+          <span>Dongchen Zheng<sup>1,3</sup></span>,
+          <span>Shoujian Zhang<sup>2</sup></span>,
+          <span>Mingqi Yuan<sup>1,3,*</sup></span>,
+          <span>Jiayu Chen<sup>1,3,*</sup></span>
+        </div>
+        <p class="author-notes" data-i18n="authorNotes">* Corresponding authors.</p>
+        <details class="affiliations">
+          <summary data-i18n="affilSummary">Affiliations</summary>
+          <ol>
+            <li data-i18n="affil1">INFIFORCE, Hangzhou, China</li>
+            <li data-i18n="affil2">Wuhan University, Wuhan, China</li>
+            <li data-i18n="affil3">The University of Hong Kong, Hong Kong SAR, China</li>
+            <li data-i18n="affil4">Tsinghua University, Beijing, China</li>
+          </ol>
+        </details>
+
+        <p class="lead" data-i18n="heroLead">
+          Pretrained VLAs capture task intent yet miss local 3D contact geometry under perturbations. GeoRefiner attaches downstream of any frozen base VLA to apply gated, geometry-conditioned residual corrections.
+        </p>
+
+        <div class="action-row">
+          <a class="btn primary" href="../../assets/papers/georefiner.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="btnPaper">Manuscript PDF ↗</a>
+          <a class="btn" href="https://agentic-intelligence-lab.org/files/Georefiner.pdf" target="_blank" rel="noreferrer" data-i18n="btnSource">Source PDF ↗</a>
+          <a class="btn" href="#explorer" data-i18n="btnBench">Benchmarks ↓</a>
+        </div>
+      </div>
+
+      <!-- Interactive Method Stage -->
+      <figure class="stage-card" id="stage-figure">
+        <figcaption class="stage-head">
+          <div>
+            <span class="smallcap" data-i18n="stageEyebrow">Plug-and-Play Pipeline</span>
+            <h2 id="stage-card-title" data-i18n="stageTitle">Downstream gated residual action refinement</h2>
+          </div>
+          <div class="stage-mode" role="group" aria-label="Deployment mode">
+            <button type="button" data-regime="geo" aria-pressed="true" data-i18n="modeGeo">+ GeoRefiner</button>
+            <button type="button" data-regime="base" aria-pressed="false" data-i18n="modeBase">Nominal Base VLA</button>
+          </div>
+        </figcaption>
+
+        <div class="stage-canvas">
+          <div class="stage-board" id="stage-board">
+            <svg id="fig-stage" class="stage-svg" aria-hidden="true"></svg>
+            <div id="stage-nodes"></div>
+          </div>
+        </div>
+
+        <div class="stage-transport">
+          <div class="step-pills" id="chapter-pills" role="group" aria-label="Refinement stage"></div>
+          <button type="button" class="play-btn" id="stage-play">Play</button>
+        </div>
+
+        <div class="stage-caption" aria-live="polite" aria-atomic="true">
+          <strong id="stage-heading">Loading…</strong>
+          <p id="stage-detail"></p>
+        </div>
+      </figure>
+    </section>
+
+    <!-- Headline Metrics Band -->
+    <section class="metrics-band" aria-label="Key experimental highlights">
+      <div class="wrap metrics-grid">
+        <div>
+          <strong class="metric-val">+13.8<span data-i18n="m1Unit"> pp Avg</span></strong>
+          <p data-i18n="metric1">Fine-grained MimicGen gain across $\pi_{0.5}$ (+18.2), FastWAM (+13.5) &amp; WMPO (+9.6)</p>
+        </div>
+        <div>
+          <strong class="metric-val">+22% / +25<span>%</span></strong>
+          <p data-i18n="metric2">Real-robot $\pi_{0.5}$ gains on Franka (+22%) &amp; AgileX Piper (+25%) under perturbations</p>
+        </div>
+        <div>
+          <strong class="metric-val">0.9<span data-i18n="m3Unit">M Params</span></strong>
+          <p data-i18n="metric3">Stage-3 adapter (&lt;1% of 400M) lifts unseen OpenVLA-OFT by +10.1 pp on LIBERO-Plus</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Method -->
+    <section class="wrap section" id="method">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="methodKicker">Architecture &amp; Staged Learning</span>
+          <h2 data-i18n="methodHeading">Decouple 3D geometric precision from the frozen VLA backbone.</h2>
+        </div>
+      </div>
+
+      <div class="pillars-grid">
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p1Num">01 · Canonicalization</span>
+          <h3 data-i18n="p1Title">0.9M Benchmark Adapter</h3>
+          <p data-i18n="p1Body">
+            Fixed converters and 4-layer MLPs align heterogeneous robot states, global/wrist RGB, and actions into a canonical 7-DoF frame.
+          </p>
+          <div class="eq-box">$$a_t = [\Delta x,\, \Delta y,\, \Delta z,\, \Delta r_x,\, \Delta r_y,\, \Delta r_z,\, g]$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p2Num">02 · Refinement</span>
+          <h3 data-i18n="p2Title">Gated Bounded Residual</h3>
+          <p data-i18n="p2Body">
+            Trajectory tokens $T$ cross-attend to DINOv2 geometry $G$ and QFormer region tokens $R$ to predict gate $\gamma$ and bounded $\Delta A$.
+          </p>
+          <div class="eq-box">$$A_{\mathrm{refined}} = A_{\mathrm{nominal}} + \gamma \odot \Delta A, \quad \Delta A = s \cdot \tanh\!\big(\operatorname{MLP}_{\mathrm{res}}(\operatorname{LN}(H))\big)$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p3Num">03 · Progressive Stages</span>
+          <h3 data-i18n="p3Title">Three-Stage Training</h3>
+          <p data-i18n="p3Body">
+            Stage 1 pretrains depth and Grounded-SAM region heads; Stage 2 learns gated residuals; Stage 3 tunes only 0.9M adapter weights.
+          </p>
+          <div class="eq-box">$$\mathcal{L}_{\mathrm{stage2}} = \mathcal{L}_{\mathrm{action}} + \lambda_{\mathrm{gate}}\mathcal{L}_{\mathrm{gate}} + \lambda_{\mathrm{smooth}}\mathcal{L}_{\mathrm{smooth}}$$</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Interactive Benchmark Explorer -->
+    <section class="section section--alt" id="explorer">
+      <div class="wrap">
+        <div class="section-header">
+          <div>
+            <span class="smallcap" data-i18n="expKicker">Benchmarks · Tables 1–4 &amp; Real Robots</span>
+            <h2 data-i18n="expHeading">Base VLA vs. +GeoRefiner across 5 policies and 2 robot platforms.</h2>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="wb-controls">
+            <div class="seg-group" id="mode-tabs" role="group" aria-label="Benchmark suite">
+              <button type="button" data-mode="colosseum" aria-pressed="true" data-i18n="tabCol">COLOSSEUM (Table 1)</button>
+              <button type="button" data-mode="mimicgen" aria-pressed="false" data-i18n="tabMimic">MimicGen (Table 2)</button>
+              <button type="button" data-mode="libero" aria-pressed="false" data-i18n="tabLibero">LIBERO-Plus (Table 3)</button>
+              <button type="button" data-mode="ablation" aria-pressed="false" data-i18n="tabAblation">Real Robot &amp; Ablations</button>
+            </div>
+
+            <div class="seg-group" id="domain-tabs" role="group" aria-label="View selector"></div>
+          </div>
+
+          <div class="wb-Subbar">
+            <div class="wb-legend" id="wb-legend"></div>
+            <div class="seg-group" id="submetric-tabs" role="group" aria-label="Condition selector"></div>
+          </div>
+
+          <div class="paired-list" id="paired-rows" aria-live="polite"></div>
+          <p class="wb-note" id="wb-takeaway"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authentic Figures -->
+    <section class="wrap section" id="figures">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="figKicker">Paper Figures</span>
+          <h2 data-i18n="figHeading">Architecture, three-stage schedule &amp; real-robot diagnostics.</h2>
+        </div>
+      </div>
+
+      <div class="fig-grid">
+        <figure class="fig-card wide">
+          <button type="button" class="fig-thumb" data-lightbox="../../assets/research/georefiner.webp" data-title="Figure 3 · GeoRefiner Plug-and-Play Architecture" data-caption="Downstream of a frozen base VLA ($\pi_{0.5}$, FastWAM, OpenVLA-OFT), the benchmark adapter, language-geometry-action encoder, and gated residual refiner predict $A_{\mathrm{refined}} = A_{\mathrm{nominal}} + \gamma \odot \Delta A$.">
+            <img src="../../assets/research/georefiner.webp" alt="Architecture of GeoRefiner" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoom1">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f3Meta">Figure 3 · System Architecture</span>
+              <a href="../../assets/papers/georefiner.pdf#page=3" target="_blank" rel="noreferrer">p.3 ↗</a>
+            </div>
+            <h3 data-i18n="f3Title">Plug-and-Play Geometry-Conditioned Refiner</h3>
+            <p data-i18n="f3Cap">Aligns native actions into canonical 7-DoF space, fuses CLIP instructions, two-view DINOv2 geometry $G$, QFormer regions $R$, and trajectory dynamics $T$, and predicts gated residuals $\gamma \odot \Delta A$.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig1-teaser.webp" data-title="Figure 1 · Nominal Failures vs. GeoRefiner" data-caption="GeoRefiner corrects fine insertion misalignments without modifying the base VLA, improving COLOSSEUM, MimicGen, LIBERO-Plus, Franka (+22%), and AgileX Piper (+25%).">
+            <img src="assets/fig1-teaser.webp" alt="Nominal base VLA failures versus GeoRefiner action refinement" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoom2">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f1Meta">Figure 1 · Overview</span>
+              <a href="../../assets/papers/georefiner.pdf#page=1" target="_blank" rel="noreferrer">p.1 ↗</a>
+            </div>
+            <h3 data-i18n="f1Title">Correcting Terminal Contact Errors</h3>
+            <p data-i18n="f1Cap">Nominal trajectories capture task intent yet fail on tight USB and block insertions; downstream residual refinement restores alignment across heterogeneous base VLAs.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig4-stages.webp" data-title="Figure 4 · Three-Stage Training Strategy" data-caption="Stage 1 depth &amp; region pretraining (120k RGB pairs), Stage 2 full residual training, and Stage 3 0.9M adapter fine-tuning (&lt;1% of parameters on 100 trajectories).">
+            <img src="assets/fig4-stages.webp" alt="Three-stage training strategy of GeoRefiner" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoom3">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f4Meta">Figure 4 · Training Schedule</span>
+              <a href="../../assets/papers/georefiner.pdf#page=4" target="_blank" rel="noreferrer">p.4 ↗</a>
+            </div>
+            <h3 data-i18n="f4Title">Three-Stage Training &amp; 0.9M Adaptation</h3>
+            <p data-i18n="f4Cap">Establishes explicit depth and Grounded-SAM region priors before training gated residuals, then freezes the 400M core to adapt to new benchmarks with &lt;1% trainable weights.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig5-realrobot.webp" data-title="Figure 5 · Real-World Evaluation on Franka &amp; AgileX Piper" data-caption="Success rates of $\pi_{0.5}$ vs. +GeoRefiner across five real-world manipulation tasks under clean, object, background, and lighting perturbations (50 trials per condition).">
+            <img src="assets/fig5-realrobot.webp" alt="Real-world evaluation on Franka and AgileX Piper" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoom4">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f5Meta">Figure 5 · Real-Robot Platforms</span>
+              <a href="../../assets/papers/georefiner.pdf#page=6" target="_blank" rel="noreferrer">p.6 ↗</a>
+            </div>
+            <h3 data-i18n="f5Title">Franka &amp; AgileX Piper Manipulation</h3>
+            <p data-i18n="f5Cap">Evaluated across Insert Block, Insert USB, Place plant, Stack three blocks, and Hang cup under clean, object, background, and lighting shifts.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig6-perturb.webp" data-title="Figure 6 · Depth &amp; Region Heatmaps Under Perturbations" data-caption="Stage-1 depth and task-relevant region heads preserve 3D object structure and contact focus under severe real-world illumination changes.">
+            <img src="assets/fig6-perturb.webp" alt="Depth and region heatmap visualizations under lighting perturbations" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoom5">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f6Meta">Figure 6 · Geometry Diagnostics</span>
+              <a href="../../assets/papers/georefiner.pdf#page=7" target="_blank" rel="noreferrer">p.7 ↗</a>
+            </div>
+            <h3 data-i18n="f6Title">Lighting-Invariant Depth &amp; Region Focus</h3>
+            <p data-i18n="f6Cap">Predicted depth maps and Grounded-SAM-supervised region heatmaps stay anchored on the cup rack and insertion peg despite strong colored lighting shifts.</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Scope, Citation & Sibling Pages -->
+    <section class="wrap section" id="cite">
+      <div class="split-grid">
+        <div class="scope-box">
+          <span class="smallcap" data-i18n="scopeKicker">Scope</span>
+          <h3 data-i18n="scopeTitle">Local trajectory refinement vs. high-level planning</h3>
+          <p data-i18n="scopeP1">
+            <strong>Intent assumption:</strong> GeoRefiner corrects local positional, orientational, and contact deviations assuming the base VLA’s nominal trajectory reflects valid task intent; high-level semantic or subgoal planning errors remain outside its scope.
+          </p>
+          <p data-i18n="scopeP2">
+            <strong>Gate &amp; region necessity:</strong> Removing the gate $\gamma$ causes over-correction under lighting shifts (&minus;2.3 pp on LIBERO-Plus Light), while dropping QFormer region tokens $R$ cuts OpenVLA-OFT gain from +10.1 to +3.2 pp.
+          </p>
+        </div>
+
+        <div class="bib-card">
+          <div class="bib-head">
+            <span data-i18n="bibHead">BibTeX · Manuscript 2027</span>
+            <button type="button" class="copy-btn" id="copy-bib">Copy BibTeX</button>
+          </div>
+          <pre id="bib-text">@unpublished{chen2027georefiner,
+  title  = {GeoRefiner: Geometry-Conditioned Plug-and-Play Action Refinement for Vision-Language-Action Models},
+  author = {Chen, Haijier and Sun, Xiaoquan and Chen, Bo and Ding, Ziyi and Chen, Jiahui and Zhu, Jiarun and Hu, Huanzhang and Zheng, Dongchen and Zhang, Shoujian and Yuan, Mingqi and Chen, Jiayu},
+  note   = {Manuscript},
+  year   = {2027},
+  url    = {https://agentic-intelligence-lab.org/files/Georefiner.pdf}
+}</pre>
+        </div>
+      </div>
+
+      <div class="sibling-nav" aria-label="Companion research pages">
+        <span class="smallcap" data-i18n="morePages">Companion Research Pages</span>
+        <div class="sibling-grid">
+          <a class="sibling-card" href="./" aria-current="page">
+            <span data-i18n="sib1Tag">Manuscript · 2027</span>
+            <strong>GeoRefiner</strong>
+            <p data-i18n="sib1Desc">Geometry-conditioned VLA action refinement.</p>
+          </a>
+          <a class="sibling-card" href="../egolam/" data-sibling="egolam">
+            <span data-i18n="sib2Tag">Embodied AI</span>
+            <strong>EgoLAM</strong>
+            <p data-i18n="sib2Desc">Latent actions from hand &amp; head motion.</p>
+          </a>
+          <a class="sibling-card" href="../state-readout-decoupling/" data-sibling="state-readout-decoupling">
+            <span data-i18n="sib3Tag">Manuscript · 2027</span>
+            <strong data-i18n="sib3Title">State–Readout Decoupling</strong>
+            <p data-i18n="sib3Desc">Horizon hidden-state rollout for world models.</p>
+          </a>
+          <a class="sibling-card" href="../causalvae/" data-sibling="causalvae">
+            <span data-i18n="sib4Tag">ECCV 2026</span>
+            <strong data-i18n="sib4Title">CausalVAE Plug-in</strong>
+            <p data-i18n="sib4Desc">Causal DAG layer for world models.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-row">
+      <span data-i18n="footAuthor">Ziyi Ding (丁子毅) · Tsinghua University</span>
+      <div>
+        <a href="../../" data-studio-home data-i18n="footStudio">Research Studio</a> ·
+        <a href="https://scholar.google.com/citations?user=1KeE6PsAAAAJ" target="_blank" rel="noreferrer">Scholar</a> ·
+        <a href="https://github.com/Dzyy123" target="_blank" rel="noreferrer">GitHub</a> ·
+        <a href="#main" data-i18n="footTop">Top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox" aria-label="Figure viewer">
+    <div class="lb-head">
+      <strong id="lb-title">Figure</strong>
+      <button type="button" class="lb-close" id="lb-close" data-i18n="lbClose">Close (Esc)</button>
+    </div>
+    <div class="lb-body">
+      <img id="lb-img" src="" alt="" />
+    </div>
+    <div class="lb-cap" id="lb-cap"></div>
+  </dialog>
+</body>
+</html>

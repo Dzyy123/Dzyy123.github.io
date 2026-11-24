@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f2efe8" />
+  <title>Iterative Identification Closure · Amplifying Causal Identifiability in Linear SEMs (arXiv 2026)</title>
+  <meta name="description" content="Iterative Identification Closure: Amplifying Causal Identifiability in Linear SEMs (arXiv:2604.09309)." />
+  <link rel="icon" type="image/svg+xml" href="assets/mark.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css?v=20261124g" />
+  <link rel="stylesheet" href="site.css?v=20261124g" />
+  <style>
+    .iic-main {
+      display: grid;
+      grid-template-columns: 1.32fr 0.96fr;
+      column-gap: 16px;
+      align-items: stretch;
+    }
+    .iic-graph-card {
+      position: relative;
+      z-index: 2;
+      background: var(--card);
+      border: 1.2px solid #c7cfc2;
+      border-radius: 10px;
+      padding: 9px 11px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .iic-graph-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .iic-graph-head strong {
+      font-size: 11.4px;
+      font-weight: 650;
+      color: var(--ink);
+    }
+    .iic-graph-head span {
+      font-size: 10.2px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .iic-arena {
+      position: relative;
+      width: 100%;
+      height: 168px;
+      background: #f5f3ec;
+      border: 1px solid #e1ded4;
+      border-radius: 8px;
+    }
+    .iic-node {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--card);
+      border: 1.7px solid #9eab9c;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11.5px;
+      font-weight: 600;
+      z-index: 2;
+      transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    }
+    .iic-node.is-id {
+      background: #e4ede1;
+      border-color: var(--accent-deep);
+      border-width: 2px;
+      color: var(--accent-deep);
+    }
+    .iic-node.is-new {
+      background: #fef6e4;
+      border-color: #b77729;
+      border-width: 2px;
+      color: #8c460a;
+    }
+    .iic-node.is-gap {
+      background: var(--clay-soft);
+      border-color: var(--clay);
+      border-width: 2px;
+      color: var(--clay);
+    }
+    .iic-steps-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .iic-steps-col .stage-box {
+      min-height: 54px;
+      padding: 8px 10px;
+    }
+  </style>
+  <script src="../vendor/katex/katex.min.js?v=20261124g" defer></script>
+  <script src="../vendor/katex/auto-render.min.js?v=20261124g" defer></script>
+  <script src="math-init.js?v=20261124g" defer></script>
+  <script src="figure.js?v=20261124g" defer></script>
+  <script src="site.js?v=20261124g" defer></script>
+  <script>if(location.search.includes("embed=1"))document.documentElement.classList.add("is-embedded");</script>
+</head>
+<body>
+  <a class="skip" href="#main" data-i18n="skipLink">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap nav-bar">
+      <div class="brand-group">
+        <a class="studio-back" href="../../" data-studio-home data-i18n="backStudio">← Ziyi Ding</a>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <a class="brand" href="#main">
+          <img src="assets/mark.svg" alt="" />
+          <span>Identification Closure</span>
+        </a>
+      </div>
+      <nav class="nav-links" aria-label="Page sections">
+        <a href="#method" data-i18n="navMethod">Method</a>
+        <a href="#explorer" data-i18n="navResults">Benchmarks</a>
+        <a href="#figures" data-i18n="navFigures">Figures</a>
+        <a href="#cite" data-i18n="navCite">BibTeX</a>
+        <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Switch language">中文</button>
+        <a class="nav-pill" href="../../assets/papers/identification-closure.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="navPaper">Preprint ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <div class="badges">
+          <span class="badge badge--accepted">arXiv 2026</span>
+          <span class="badge badge--topic" data-i18n="topicBadge">Linear SEMs · Identifiability</span>
+        </div>
+        <h1>Iterative Identification <span>Closure</span></h1>
+        <p class="subtitle" data-i18n="fullTitle">Iterative Identification Closure: Amplifying Causal Identifiability in Linear SEMs</p>
+
+        <div class="byline" aria-label="Authors">
+          <span class="self">Ziyi Ding<sup>1</sup></span>,
+          <span>Xiao-Ping Zhang<sup>1,*</sup></span>
+        </div>
+        <p class="author-notes" data-i18n="authorNotes">* Corresponding author.</p>
+        <details class="affiliations">
+          <summary data-i18n="affilSummary">Affiliation</summary>
+          <ol>
+            <li data-i18n="affil1">Tsinghua Shenzhen International Graduate School, Tsinghua University</li>
+          </ol>
+        </details>
+
+        <p class="lead" data-i18n="heroLead">
+          Standard Half-Trek Criterion (HTC) resolves all parents of a node at once. Iterative Identification Closure (IIC) substitutes seed coefficients and propagates Reduced HTC to amplify partial knowledge into near-global identifiability.
+        </p>
+
+        <div class="action-row">
+          <a class="btn primary" href="../../assets/papers/identification-closure.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="btnPaper">Preprint PDF ↗</a>
+          <a class="btn" href="https://arxiv.org/abs/2604.09309" target="_blank" rel="noreferrer">arXiv:2604.09309 ↗</a>
+          <a class="btn" href="#explorer" data-i18n="btnExplorer">Benchmarks</a>
+          <a class="btn" href="#cite" data-i18n="btnCite">BibTeX</a>
+        </div>
+      </div>
+
+      <!-- Interactive Method Stage -->
+      <figure class="stage-card" id="stage-figure">
+        <figcaption class="stage-head">
+          <div>
+            <span class="smallcap" data-i18n="stageEyebrow">Interactive Propagation</span>
+            <h2 id="stage-card-title" data-i18n="stageTitle">Seed substitution &amp; Reduced HTC closure</h2>
+          </div>
+          <div class="stage-mode" role="group" aria-label="Identification regime">
+            <button type="button" data-regime="iic" aria-pressed="true" data-i18n="modeIIC">IIC Closure</button>
+            <button type="button" data-regime="htc" aria-pressed="false" data-i18n="modeHTC">One-Shot HTC</button>
+          </div>
+        </figcaption>
+
+        <div class="stage-canvas">
+          <div class="stage-board" id="stage-board">
+            <svg id="fig-stage" class="stage-svg" aria-hidden="true"></svg>
+            <div id="stage-nodes"></div>
+          </div>
+        </div>
+
+        <div class="stage-transport">
+          <div class="step-pills" id="chapter-pills" role="group" aria-label="Propagation step"></div>
+          <button type="button" class="play-btn" id="stage-play">Play</button>
+        </div>
+
+        <div class="stage-caption" aria-live="polite" aria-atomic="true">
+          <strong id="stage-heading">Loading…</strong>
+          <p id="stage-detail"></p>
+        </div>
+      </figure>
+    </section>
+
+    <!-- Headline Metrics Band -->
+    <section class="metrics-band" aria-label="Key experimental highlights">
+      <div class="wrap metrics-grid">
+        <div>
+          <strong class="metric-val">97.5<span>%</span></strong>
+          <p data-i18n="metric1">Identification on $n = 6$ mixed graphs ($\gamma \approx 4.0\times$ amplification over 2 seeds)</p>
+        </div>
+        <div>
+          <strong class="metric-val">100<span>% Prec.</span></strong>
+          <p data-i18n="metric2">Zero false positives across 134,144 exhaustively verified edges ($n \le 5$)</p>
+        </div>
+        <div>
+          <strong class="metric-val">13 / 13<span> Edges</span></strong>
+          <p data-i18n="metric3">Closes all 5 previously unidentifiable CHD edges in Mendelian Randomization</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Method & Identifiability -->
+    <section class="wrap section" id="method">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="methodKicker">Two-Phase Architecture</span>
+          <h2 data-i18n="methodHeading">Turn sparse causal seeds into a monotone fixed-point closure.</h2>
+        </div>
+      </div>
+
+      <div class="pillars-grid">
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p1Num">01 · Composable Seeds</span>
+          <h3 data-i18n="p1Title">Modular Seed Interface</h3>
+          <p data-i18n="p1Body">
+            Any sound source—instrumental variables, $\mathrm{do}(v)$ interventions, non-Gaussianity, or domain knowledge—initializes $\mathcal{S}_0$ and composes monotonically.
+          </p>
+          <div class="eq-box">$$\mathcal{I}_0 = \mathcal{S}_0 \cup \{e \in D : e \text{ is HTC-identifiable}\}$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p2Num">02 · Theorem 4.3</span>
+          <h3 data-i18n="p2Title">Reduced HTC Substitution</h3>
+          <p data-i18n="p2Body">
+            Subtracting known parent effects $K \subseteq \mathrm{pa}(i)$ shrinks unknown parents to $R = \mathrm{pa}(i)\setminus K$ while preserving generic full rank of $J = [\Sigma_{w_l, r_m}]$.
+          </p>
+          <div class="eq-box">$$X_i' = X_i - \sum_{k \in K} B_{ki} X_k = \sum_{r \in R} B_{ri} X_r + \varepsilon_i$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num" data-i18n="p3Num">03 · Fixed-Point Closure</span>
+          <h3 data-i18n="p3Title">Node-Wise Optimal Limit</h3>
+          <p data-i18n="p3Body">
+            Iterating Reduced HTC reaches a unique least fixed point in $\le |D|$ rounds ($\le 2$ empirically), strictly subsuming HTC and ancestor decomposition.
+          </p>
+          <div class="eq-box">$$\mathcal{I}_{k+1} = \mathcal{I}_k \cup \{j \to i : R = \mathrm{pa}(i)\setminus K \text{ satisfies Reduced HTC}\}$$</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Interactive Paired Benchmark Explorer -->
+    <section class="section section--alt" id="explorer">
+      <div class="wrap">
+        <div class="section-header">
+          <div>
+            <span class="smallcap" data-i18n="expKicker">Benchmarks · Tables 1–3, 9–10, 12</span>
+            <h2 data-i18n="expHeading">Amplification, exhaustive precision, scaling &amp; CHD Mendelian Randomization.</h2>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="wb-controls">
+            <div class="seg-group" id="mode-tabs" role="group" aria-label="Evaluation benchmark">
+              <button type="button" data-mode="random6" aria-pressed="true" data-i18n="tabRand">Mixed Graphs $n = 6$ (Tables 1 &amp; 3)</button>
+              <button type="button" data-mode="exhaustive" aria-pressed="false" data-i18n="tabExh">Exhaustive &amp; CHD MR (Table 2 &amp; Fig. 5)</button>
+              <button type="button" data-mode="scaling" aria-pressed="false" data-i18n="tabScale">Scaling $|V| = 10\dots 100$ (Table 9)</button>
+              <button type="button" data-mode="estimation" aria-pressed="false" data-i18n="tabEst">Estimation &amp; Robustness (Tables 10 &amp; 12)</button>
+            </div>
+          </div>
+
+          <div class="wb-Subbar">
+            <div class="wb-legend" id="wb-legend"></div>
+            <div class="seg-group" id="submetric-tabs" role="group" aria-label="Metric selector"></div>
+          </div>
+
+          <div class="paired-list" id="paired-rows" aria-live="polite"></div>
+          <p class="wb-note" id="wb-takeaway"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authentic Figures -->
+    <section class="wrap section" id="figures">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="figKicker">Paper Figures</span>
+          <h2 data-i18n="figHeading">Framework diagrams, propagation dynamics &amp; epidemiology case study.</h2>
+        </div>
+      </div>
+
+      <div class="fig-grid">
+        <figure class="fig-card wide">
+          <button type="button" class="fig-thumb" data-lightbox="../../assets/research/identification-closure.webp" data-title="Figure 1 · Iterative Identification Closure (IIC) Overview" data-caption="Modular seed interface $\mathcal{S}_0$, iterative Reduced HTC feedback loop, 4-node IV propagation example, and $97.5\%$ identification ($\gamma \approx 4\times$).">
+            <img src="../../assets/research/identification-closure.webp" alt="Overview of Iterative Identification Closure framework" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomFig1">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f1Meta">Figure 1 · Architecture</span>
+              <a href="../../assets/papers/identification-closure.pdf#page=4" target="_blank" rel="noreferrer">p.4 ↗</a>
+            </div>
+            <h3 data-i18n="f1Title">IIC Framework &amp; Amplification</h3>
+            <p data-i18n="f1Cap">Combines heterogeneous seed functions with Reduced HTC feedback to reach $\mathrm{IIC}(\mathcal{S}_0)$.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig2-propagation.webp" data-title="Figure 2 · Step-by-Step Propagation ($t = 0, 1, 2$)" data-caption="Five-node confounded SEM: IV seeds resolve $Z \to T$ and $Z \to U$ at $t=0$, unlocking all three confounded parents of $Y$ at $t=1$ and reaching fixed point at $t=2$.">
+            <img src="assets/fig2-propagation.webp" alt="Iterative propagation of IIC on a 5-node example" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomFig2">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f2Meta">Figure 2 · Propagation</span>
+              <a href="../../assets/papers/identification-closure.pdf#page=5" target="_blank" rel="noreferrer">p.5 ↗</a>
+            </div>
+            <h3 data-i18n="f2Title">Two-Step Fixed-Point Trace</h3>
+            <p data-i18n="f2Cap">Resolves all incoming edges of $Y$ despite $T, W \in \mathrm{sib}(Y)$, where standard HTC identifies none.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig4-amplification.webp" data-title="Figure 4 · Identification Breakdown &amp; Amplification Factor $\gamma$" data-caption="Combined seeds cut the $n = 5$ gap from $17\%$ to $2.6\%$; intervention seeds achieve $\gamma \approx 4.0\times$ propagation gain vs. $\gamma \le 1.2\times$ for non-iterative baselines.">
+            <img src="assets/fig4-amplification.webp" alt="Identification breakdown and propagation amplification factor" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomFig4">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f4Meta">Figure 4 · Amplification</span>
+              <a href="../../assets/papers/identification-closure.pdf#page=8" target="_blank" rel="noreferrer">p.8 ↗</a>
+            </div>
+            <h3 data-i18n="f4Title">Propagation Gain $\gamma \approx 4\times$</h3>
+            <p data-i18n="f4Cap">Two seeds ($\sim 3\%$ of edges) unlock $+11.9\%$ total identification via iterative feedback.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig3-scaling.webp" data-title="Figure 3 · Scalability up to $|V| = 100$" data-caption="HTC vs. IIC identification rate and runtime in milliseconds across $|V| \in \{10, 20, 50, 100\}$, completing in $< 6$ seconds at $100$ nodes.">
+            <img src="assets/fig3-scaling.webp" alt="HTC vs IIC identification rate and runtime scaling" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomFig3">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f3Meta">Figure 3 · Scalability</span>
+              <a href="../../assets/papers/identification-closure.pdf#page=8" target="_blank" rel="noreferrer">p.8 ↗</a>
+            </div>
+            <h3 data-i18n="f3Title">Polynomial Runtime Scaling</h3>
+            <p data-i18n="f3Cap">Reaches $98.6\%$–$99.7\%$ identification from $|V| = 10$ to $100$ in $18\text{ ms}$ to $5.6\text{ s}$.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig5-chd.webp" data-title="Figure 5 · Coronary Heart Disease Mendelian Randomization Network" data-caption="Nine-node cardiovascular SEM (13 directed, 4 bidirected edges): standard HTC leaves all $5/13$ edges into CHD unresolved; IIC with genetic IVs identifies $13/13$ ($100\%$).">
+            <img src="assets/fig5-chd.webp" alt="Mendelian randomization network for Coronary Heart Disease" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomFig5">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap" data-i18n="f5Meta">Figure 5 · Case Study</span>
+              <a href="../../assets/papers/identification-closure.pdf#page=9" target="_blank" rel="noreferrer">p.9 ↗</a>
+            </div>
+            <h3 data-i18n="f5Title">CHD Mendelian Randomization</h3>
+            <p data-i18n="f5Cap">Genetic IV seeds on BMI and SBP shrink $|R|$ from $5$ to $3$, resolving all $5$ confounded CHD edges.</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Scope, Citation & Sibling Pages -->
+    <section class="wrap section" id="cite">
+      <div class="split-grid">
+        <div class="scope-box">
+          <span class="smallcap" data-i18n="scopeKicker">Scope</span>
+          <h3 data-i18n="scopeTitle">Optimality class &amp; misspecification profile</h3>
+          <p data-i18n="scopeP1">
+            <strong>Node-wise polynomial boundary:</strong> IIC is optimal within node-wise HTC rules (Theorem B.2); residual gap edges satisfy $|R| \ge 2$ and $|R \cap \mathrm{sib}(i)| \ge 1$ ($78.7\%$ have $|R|=2, |R \cap \mathrm{sib}(i)|=1$), requiring extra seeds or NP-hard cross-node Gröbner solvers.
+          </p>
+          <p data-i18n="scopeP2">
+            <strong>Graph error resilience:</strong> Under $30\%$ structural perturbation (Table 12), precision stays $\ge 96.4\%$ and recall $\ge 96.5\%$; omitted latent confounders represent the main precision risk, while extra bidirected edges safely lower recall only.
+          </p>
+        </div>
+
+        <div class="bib-card">
+          <div class="bib-head">
+            <span data-i18n="bibLabel">BibTeX · arXiv 2026</span>
+            <button type="button" class="copy-btn" id="copy-bib">Copy BibTeX</button>
+          </div>
+          <pre id="bib-text">@article{ding2026iic,
+  title   = {Iterative Identification Closure: Amplifying Causal Identifiability in Linear SEMs},
+  author  = {Ding, Ziyi and Zhang, Xiao-Ping},
+  journal = {arXiv preprint arXiv:2604.09309},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2604.09309}
+}</pre>
+        </div>
+      </div>
+
+      <div class="sibling-nav" aria-label="Companion research pages">
+        <span class="smallcap" data-i18n="morePages">Companion Research Pages</span>
+        <div class="sibling-grid">
+          <a class="sibling-card" href="./" aria-current="page">
+            <span>arXiv 2026</span>
+            <strong>Identification Closure</strong>
+            <p data-i18n="sibSelf">Amplifying identifiability in linear SEMs.</p>
+          </a>
+          <a class="sibling-card" href="../gaussdetect-lingam/" data-sibling="gaussdetect-lingam">
+            <span>arXiv 2025</span>
+            <strong>GaussDetect-LiNGAM</strong>
+            <p data-i18n="sibGD">Causal direction without normality pre-tests.</p>
+          </a>
+          <a class="sibling-card" href="../tree-query/" data-sibling="tree-query">
+            <span>arXiv 2026</span>
+            <strong>Tree-Query</strong>
+            <p data-i18n="sibTQ">Multi-agent causal tree &amp; adversarial confidence.</p>
+          </a>
+          <a class="sibling-card" href="../causal-tongue-tie/" data-sibling="causal-tongue-tie">
+            <span data-i18n="sibTTVenue">EMNLP 2026 · Award Nom.</span>
+            <strong>Causal Tongue-Tie</strong>
+            <p data-i18n="sibTT">Hidden causal probes vs. Yes/No output.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-row">
+      <span data-i18n="footAuthor">Ziyi Ding (丁子毅) · Tsinghua SIGS</span>
+      <div>
+        <a href="../../" data-studio-home data-i18n="footStudio">Research Studio</a> ·
+        <a href="https://scholar.google.com/citations?user=1KeE6PsAAAAJ" target="_blank" rel="noreferrer">Scholar</a> ·
+        <a href="https://github.com/Dzyy123" target="_blank" rel="noreferrer">GitHub</a> ·
+        <a href="#main" data-i18n="footTop">Top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox" aria-label="Figure viewer">
+    <div class="lb-head">
+      <strong id="lb-title">Figure</strong>
+      <button type="button" class="lb-close" id="lb-close" data-i18n="lbClose">Close (Esc)</button>
+    </div>
+    <div class="lb-body">
+      <img id="lb-img" src="" alt="" />
+    </div>
+    <div class="lb-cap" id="lb-cap"></div>
+  </dialog>
+</body>
+</html>
