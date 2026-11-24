@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f2efe8" />
+  <title>Traj-LeWM · Path-Aware World-Model Planning via Latent Trajectory Cost</title>
+  <meta name="description" content="Traj-LeWM supplements endpoint distance in visual world-model planning with a preference-learned goal-conditioned latent trajectory cost (LTC)." />
+  <link rel="icon" type="image/svg+xml" href="assets/mark.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css?v=20261124f" />
+  <link rel="stylesheet" href="site.css?v=20261124f" />
+  <script src="../vendor/katex/katex.min.js?v=20261124f" defer></script>
+  <script src="../vendor/katex/auto-render.min.js?v=20261124f" defer></script>
+  <script src="math-init.js?v=20261124f" defer></script>
+  <script src="figure.js?v=20261124f" defer></script>
+  <script src="site.js?v=20261124f" defer></script>
+  <script>if(location.search.includes("embed=1"))document.documentElement.classList.add("is-embedded");</script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap nav-bar">
+      <div class="brand-group">
+        <a class="studio-back" href="../../" data-studio-home data-i18n="backStudio">← Ziyi Ding</a>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <a class="brand" href="#main">
+          <img src="assets/mark.svg" alt="" />
+          <span>Traj-LeWM</span>
+        </a>
+      </div>
+      <nav class="nav-links" aria-label="Page sections">
+        <a href="#method" data-i18n="navMethod">Method</a>
+        <a href="#explorer" data-i18n="navResults">Results</a>
+        <a href="#figures" data-i18n="navFigures">Figures</a>
+        <a href="#cite" data-i18n="navCite">BibTeX</a>
+        <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Switch language">中文</button>
+        <a class="nav-pill" href="../../assets/papers/traj-lewm.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="navPaper">Preprint ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <div class="badges">
+          <span class="badge badge--accepted">arXiv 2026</span>
+          <span class="badge badge--topic" data-i18n="topicBadge">World-Model Planning · Franka FR3</span>
+        </div>
+        <h1>Traj-<span>LeWM</span></h1>
+        <p class="subtitle" data-i18n="fullTitle">Path-Aware World-Model Planning via Latent Trajectory Cost</p>
+
+        <div class="byline" aria-label="Authors">
+          <span>Xiaodi Huang<sup>1,2,*</sup></span>,
+          <span class="self">Ziyi Ding<sup>3,5,*</sup></span>,
+          <span>Yuchen Liu<sup>4</sup></span>,
+          <span>Yuan Zhang<sup>7</sup></span>,
+          <span>Jingtian Wan<sup>6,5</sup></span>,
+          <span>Xiao-Ping Zhang<sup>3</sup></span>,
+          <span>Jiayu Chen<sup>4,5,†</sup></span>,
+          <span>Zhang Zhang<sup>1,†</sup></span>,
+          <span>Tao Huang<sup>2,†</sup></span>
+        </div>
+        <p class="author-notes" data-i18n="authorNotes">* Equal contribution. † Corresponding authors.</p>
+        <details class="affiliations">
+          <summary data-i18n="affilSummary">Affiliations</summary>
+          <ol>
+            <li>Institute of Automation, Chinese Academy of Sciences</li>
+            <li>Shanghai Jiao Tong University</li>
+            <li>Tsinghua Shenzhen International Graduate School</li>
+            <li>The University of Hong Kong</li>
+            <li>INFIFORCE</li>
+            <li>University of Science and Technology of China</li>
+            <li>Peking University</li>
+          </ol>
+        </details>
+
+        <p class="lead" data-i18n="heroLead">
+          Endpoint distance ignores how a trajectory reaches its goal. Traj-LeWM adds a lightweight (&lt;1M-parameter) Latent Trajectory Cost that shapes the visual encoder and re-ranks CEM candidate paths.
+        </p>
+
+        <div class="action-row">
+          <a class="btn primary" href="../../assets/papers/traj-lewm.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="btnPaper">Preprint PDF ↗</a>
+          <a class="btn" href="https://arxiv.org/abs/2608.14125" target="_blank" rel="noreferrer">arXiv ↗</a>
+          <a class="btn" href="#explorer" data-i18n="btnExplorer">Benchmarks</a>
+          <a class="btn" href="#cite" data-i18n="btnCite">BibTeX</a>
+        </div>
+      </div>
+
+      <!-- Interactive Trajectory Ranking Stage -->
+      <figure class="stage-card" id="stage-figure">
+        <figcaption class="stage-head">
+          <div>
+            <span class="smallcap" data-i18n="stageEyebrow">Interactive CEM Arena</span>
+            <h2 id="stage-card-title" data-i18n="stageTitle">Matched endpoints, opposite execution outcomes</h2>
+          </div>
+          <div class="stage-mode" role="group" aria-label="Scoring rule">
+            <button type="button" data-scorer="endpoint" aria-pressed="false" data-i18n="modeEndpoint">$C_0$ Only</button>
+            <button type="button" data-scorer="joint" aria-pressed="true" data-i18n="modeJoint">$C_0 + \lambda\tilde{S}_\psi$</button>
+          </div>
+        </figcaption>
+
+        <div class="stage-canvas">
+          <div class="stage-board" id="stage-board">
+            <div id="stage-nodes"></div>
+          </div>
+        </div>
+
+        <div class="stage-transport">
+          <div class="step-pills" id="chapter-pills" role="group" aria-label="Method stage"></div>
+          <button type="button" class="play-btn" id="stage-play">Play</button>
+        </div>
+
+        <div class="stage-caption" aria-live="polite" aria-atomic="true">
+          <strong id="stage-heading">Loading…</strong>
+          <p id="stage-detail"></p>
+        </div>
+      </figure>
+    </section>
+
+    <!-- Headline Metrics Band -->
+    <section class="metrics-band" aria-label="Key experimental highlights">
+      <div class="wrap metrics-grid">
+        <div>
+          <strong class="metric-val">85.8 → 93.5<span>%</span></strong>
+          <p data-i18n="metric1">Mean success across 4 tasks (Cube +14 pp · Reacher +7 pp)</p>
+        </div>
+        <div>
+          <strong class="metric-val">94.4<span>%</span></strong>
+          <p data-i18n="metric2">Correct ordering on 207 endpoint-matched Reacher pairs</p>
+        </div>
+        <div>
+          <strong class="metric-val">50 → 70<span>%</span></strong>
+          <p data-i18n="metric3">Franka FR3 real-robot success (collisions halved: 4 → 2)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Method Formulation -->
+    <section class="wrap section" id="method">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="methodKicker">Method</span>
+          <h2 data-i18n="methodHeading">Path-level supervision &amp; ranking in &lt;1M parameters.</h2>
+        </div>
+      </div>
+
+      <div class="pillars-grid">
+        <article class="pillar-card">
+          <span class="pillar-num">01 · Path Functional</span>
+          <h3 data-i18n="p1Title">Goal-Conditioned LTC</h3>
+          <p data-i18n="p1Body">
+            Aggregates state $z_t$, step change $\Delta z_t$, goal residual $d_t^g = z_g - z_t$, and phase $\eta_t$ across the rollout.
+          </p>
+          <div class="eq-box">$$S_\psi(\tau \mid g) = \frac{1}{T}\sum_{t=0}^{T-1}\ell_\psi(z_t, \Delta z_t, d_t^g, \eta_t)$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num">02 · Representation</span>
+          <h3 data-i18n="p2Title">Preference Supervision</h3>
+          <p data-i18n="p2Body">
+            Contrasts expert paths against goal mismatches, fixed-endpoint jitter, and mined closed-loop CEM failures.
+          </p>
+          <div class="eq-box">$$\mathcal{L} = \mathcal{L}_{\mathrm{LeWM}} + \lambda_{\mathrm{path}}\mathcal{L}_{\mathrm{path}} + \lambda_{\mathrm{mined}}\mathcal{L}_{\mathrm{mined}}$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num">03 · Planning</span>
+          <h3 data-i18n="p3Title">IQR-Calibrated Ranking</h3>
+          <p data-i18n="p3Body">
+            Aligns LTC scale with endpoint distance $C_0$ across the CEM candidate pool at test time.
+          </p>
+          <div class="eq-box">$$C_\lambda(\hat{\tau}, g) = C_0(\hat{\tau}, g) + \lambda\frac{\mathrm{IQR}(C_0)}{\mathrm{IQR}(S_\psi)}\,S_\psi(\hat{\tau} \mid g)$$</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Interactive Results & Real-Robot Explorer -->
+    <section class="section section--alt" id="explorer">
+      <div class="wrap">
+        <div class="section-header">
+          <div>
+            <span class="smallcap" data-i18n="expKicker">Results · Tables 2–4</span>
+            <h2 data-i18n="expHeading">Simulation, ablations &amp; Franka FR3 evaluation.</h2>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="wb-controls">
+            <div class="seg-group" id="view-tabs" role="group" aria-label="Experiment category">
+              <button type="button" data-view="sim" aria-pressed="true" data-i18n="tabSim">Simulation (Table 2)</button>
+              <button type="button" data-view="ablation" aria-pressed="false" data-i18n="tabAblation">Ablations (Table 4)</button>
+              <button type="button" data-view="controlled" aria-pressed="false" data-i18n="tabControlled">Path Diagnostics</button>
+              <button type="button" data-view="robot" aria-pressed="false" data-i18n="tabRobot">Franka FR3 (Table 3)</button>
+            </div>
+          </div>
+
+          <div class="wb-Subbar">
+            <div class="wb-legend" id="wb-legend"></div>
+            <div class="seg-group" id="sub-tabs" role="group" aria-label="Task or metric"></div>
+          </div>
+
+          <div class="paired-list" id="paired-rows" aria-live="polite"></div>
+          <p class="wb-note" id="wb-takeaway"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authentic Figures Gallery -->
+    <section class="wrap section" id="figures">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="figKicker">Figures</span>
+          <h2 data-i18n="figHeading">Method overview, controlled tests &amp; real robot.</h2>
+        </div>
+      </div>
+
+      <div class="fig-grid">
+        <figure class="fig-card wide">
+          <button type="button" class="fig-thumb" data-lightbox="../../assets/research/traj-lewm.webp" data-method-img data-title="Figure 1 · Overview of Traj-LeWM" data-caption="Visual representation, preference training, and joint CEM trajectory ranking.">
+            <img src="../../assets/research/traj-lewm.webp" data-method-img-el alt="Traj-LeWM overview" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomFig">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">Figure 1</span>
+              <a href="../../assets/papers/traj-lewm.pdf#page=2" target="_blank" rel="noreferrer" data-paper-p2>p.2 ↗</a>
+            </div>
+            <h3 data-i18n="f1Title">Three-Stage Pipeline</h3>
+            <p data-i18n="f1Cap">Latent trajectory encoding, synthetic + failure preference training, and joint CEM scoring.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig2-ranking-tests.webp" data-title="Figure 2 · Controlled Ranking Tests" data-caption="Endpoint-only AUC gain (a) and hard-pair LTC ordering gain (b).">
+            <img src="assets/fig2-ranking-tests.webp" alt="Controlled ranking tests" loading="lazy" />
+            <span class="zoom-hint">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">Figure 2</span>
+              <a href="../../assets/papers/traj-lewm.pdf#page=6" target="_blank" rel="noreferrer" data-paper-p6>p.6 ↗</a>
+            </div>
+            <h3 data-i18n="f2Title">Representation vs. Ranking</h3>
+            <p data-i18n="f2Cap">Separates encoder AUC gains from explicit LTC reordering on discrepant rollouts.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig3-reacher-controlled.webp" data-title="Figure 3 · Endpoint-Controlled Reacher Tests" data-caption="94.4% correct ordering on matched endpoints (a); 100% sensitivity under fixed endpoints (b).">
+            <img src="assets/fig3-reacher-controlled.webp" alt="Endpoint-controlled Reacher tests" loading="lazy" />
+            <span class="zoom-hint">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">Figure 3</span>
+              <a href="../../assets/papers/traj-lewm.pdf#page=6" target="_blank" rel="noreferrer" data-paper-p6b>p.6 ↗</a>
+            </div>
+            <h3 data-i18n="f3Title">Endpoint-Controlled Tests</h3>
+            <p data-i18n="f3Cap">LTC separates feasible from failed paths even when endpoint costs match.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig4-real-robot.webp" data-title="Figure 4 · Franka FR3 Real-Robot Tasks" data-caption="30 Hz 3-view RGB setup showing start, intermediate, and 1.5s visual goal.">
+            <img src="assets/fig4-real-robot.webp" alt="Franka FR3 setup" loading="lazy" />
+            <span class="zoom-hint">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">Figure 4</span>
+              <a href="../../assets/papers/traj-lewm.pdf#page=7" target="_blank" rel="noreferrer" data-paper-p7>p.7 ↗</a>
+            </div>
+            <h3 data-i18n="f4Title">Franka FR3 Setup</h3>
+            <p data-i18n="f4Cap">20 paired visual start–goal tasks (10/20 → 14/20 success).</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig5-two-room-attention.webp" data-title="Figure 5 · Two-Room Attention Shift" data-caption="Final-layer CLS-to-patch attention responds to the central wall and doorway.">
+            <img src="assets/fig5-two-room-attention.webp" alt="Two-Room attention maps" loading="lazy" />
+            <span class="zoom-hint">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">Figure 5</span>
+              <a href="../../assets/papers/traj-lewm.pdf#page=7" target="_blank" rel="noreferrer" data-paper-p7b>p.7 ↗</a>
+            </div>
+            <h3 data-i18n="f5Title">Doorway Attention Shift</h3>
+            <p data-i18n="f5Cap">Preference supervision shifts encoder attention onto wall bottlenecks.</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Scope, Citation & Sibling Pages -->
+    <section class="wrap section" id="cite">
+      <div class="split-grid">
+        <div class="scope-box">
+          <span class="smallcap" data-i18n="scopeKicker">Scope</span>
+          <h3 data-i18n="scopeTitle">Complementary signal &amp; boundaries</h3>
+          <p data-i18n="scopeP1">
+            <strong>Lightweight regime:</strong> LTC supplements endpoint distance without pretrained visual backbones; frozen DINOv2 features still lead on Two-Room (100% vs. 94%).
+          </p>
+          <p data-i18n="scopeP2">
+            <strong>Real-robot sample:</strong> The 20 paired Franka FR3 trials (14/20 vs. 10/20) provide preliminary physical feasibility evidence rather than a large-sample test.
+          </p>
+        </div>
+
+        <div class="bib-card">
+          <div class="bib-head">
+            <span>BibTeX · arXiv:2608.14125</span>
+            <button type="button" class="copy-btn" id="copy-bib">Copy BibTeX</button>
+          </div>
+          <pre id="bib-text">@article{huang2026trajlewm,
+  title   = {Traj-LeWM: Path-Aware World-Model Planning via Latent Trajectory Cost},
+  author  = {Huang, Xiaodi and Ding, Ziyi and Liu, Yuchen and Zhang, Yuan and Wan, Jingtian and Zhang, Xiao-Ping and Chen, Jiayu and Zhang, Zhang and Huang, Tao},
+  journal = {arXiv preprint arXiv:2608.14125},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2608.14125}
+}</pre>
+        </div>
+      </div>
+
+      <div class="sibling-nav" aria-label="Companion research pages">
+        <span class="smallcap" data-i18n="morePages">Companion Research Pages</span>
+        <div class="sibling-grid">
+          <a class="sibling-card" href="../causalvae/index.html" data-sibling="causalvae">
+            <span>ECCV 2026</span>
+            <strong>CausalVAE Plug-in</strong>
+            <p>Causal DAG layer for world models.</p>
+          </a>
+          <a class="sibling-card" href="./index.html" aria-current="page">
+            <span>arXiv 2026</span>
+            <strong>Traj-LeWM</strong>
+            <p>Path-aware planning via trajectory cost.</p>
+          </a>
+          <a class="sibling-card" href="../causal-tongue-tie/index.html" data-sibling="causal-tongue-tie">
+            <span>EMNLP 2026 · Award Nom.</span>
+            <strong>Causal Tongue-Tie</strong>
+            <p>Hidden causal probes vs. Yes/No output.</p>
+          </a>
+          <a class="sibling-card" href="https://dzyy123.github.io/intervene-calibrate-discover/" target="_blank" rel="noreferrer">
+            <span>Visual Causality</span>
+            <strong>ICD ↗</strong>
+            <p>Causal structure from pixel interventions.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-row">
+      <span>Ziyi Ding (丁子毅) · Tsinghua SIGS</span>
+      <div>
+        <a href="../../" data-studio-home>Research Studio</a> ·
+        <a href="https://scholar.google.com/citations?user=1KeE6PsAAAAJ" target="_blank" rel="noreferrer">Scholar</a> ·
+        <a href="https://github.com/Dzyy123" target="_blank" rel="noreferrer">GitHub</a> ·
+        <a href="#main">Top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox" aria-label="Figure viewer">
+    <div class="lb-head">
+      <strong id="lb-title">Figure</strong>
+      <button type="button" class="lb-close" id="lb-close">Close (Esc)</button>
+    </div>
+    <div class="lb-body">
+      <img id="lb-img" src="" alt="" />
+    </div>
+    <div class="lb-cap" id="lb-cap"></div>
+  </dialog>
+</body>
+</html>

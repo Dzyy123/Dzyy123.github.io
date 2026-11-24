@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f2efe8" />
+  <title>Causal Tongue-Tie · Hidden Causal Representations vs. Verbal Outputs (EMNLP 2026)</title>
+  <meta name="description" content="Causal Tongue-Tie: LLMs Can Encode Causal Direction, But Their Yes/No Outputs Fail to Express (EMNLP 2026 Award Nomination)." />
+  <link rel="icon" type="image/svg+xml" href="assets/mark.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css?v=20261124f" />
+  <link rel="stylesheet" href="site.css?v=20261124f" />
+  <script src="../vendor/katex/katex.min.js?v=20261124f" defer></script>
+  <script src="../vendor/katex/auto-render.min.js?v=20261124f" defer></script>
+  <script src="math-init.js?v=20261124f" defer></script>
+  <script src="figure.js?v=20261124f" defer></script>
+  <script src="site.js?v=20261124f" defer></script>
+  <script>if(location.search.includes("embed=1"))document.documentElement.classList.add("is-embedded");</script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap nav-bar">
+      <div class="brand-group">
+        <a class="studio-back" href="../../" data-studio-home data-i18n="backStudio">← Ziyi Ding</a>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <a class="brand" href="#main">
+          <img src="assets/mark.svg" alt="" />
+          <span>Causal Tongue-Tie</span>
+        </a>
+      </div>
+      <nav class="nav-links" aria-label="Page sections">
+        <a href="#method" data-i18n="navMethod">2×2 View</a>
+        <a href="#explorer" data-i18n="navResults">Evidence</a>
+        <a href="#figures" data-i18n="navFigures">Figures</a>
+        <a href="#cite" data-i18n="navCite">BibTeX</a>
+        <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Switch language">中文</button>
+        <a class="nav-pill" href="../../assets/papers/causal-reasoning.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="navPaper">Paper ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <div class="badges">
+          <span class="badge badge--accepted">EMNLP 2026</span>
+          <span class="badge badge--award">Award Nomination (&lt;1%)</span>
+          <span class="badge badge--topic" data-i18n="topicBadge">LLM Causal Reasoning</span>
+        </div>
+        <h1>Causal <span>Tongue-Tie</span></h1>
+        <p class="subtitle" data-i18n="fullTitle">LLMs Can Encode Causal Direction, But Their Yes/No Outputs Fail to Express</p>
+
+        <div class="byline" aria-label="Authors">
+          <span class="self">Ziyi Ding<sup>1</sup></span>,
+          <span>Xiao-Ping Zhang<sup>1,*</sup></span>
+        </div>
+        <p class="author-notes" data-i18n="authorNotes">* Corresponding author.</p>
+        <details class="affiliations">
+          <summary data-i18n="affilSummary">Affiliation</summary>
+          <ol>
+            <li>Shenzhen Key Laboratory of Ubiquitous Data Enabling, Tsinghua Shenzhen International Graduate School, Tsinghua University</li>
+          </ol>
+        </details>
+
+        <p class="lead" data-i18n="heroLead">
+          Wrong Yes/No, recoverable causal direction. Across 8 instruction-tuned LLMs (0.5B–72B), frozen hidden-state probes reach ≥96.9% on anti-commonsense CLADDER while spoken Yes/No stalls at 35.0%–52.5%.
+        </p>
+
+        <div class="action-row">
+          <a class="btn primary" href="../../assets/papers/causal-reasoning.pdf" target="_blank" rel="noreferrer" data-paper-pdf data-i18n="btnPaper">Paper PDF ↗</a>
+          <a class="btn" href="https://arxiv.org/abs/2605.25891" target="_blank" rel="noreferrer">arXiv ↗</a>
+          <a class="btn" href="https://github.com/Dzyy123/tongue-tie-emnlp2026" target="_blank" rel="noreferrer">Code ↗</a>
+          <a class="btn" href="../../assets/research/posters/causal-reasoning.pdf" target="_blank" rel="noreferrer" data-poster-pdf data-i18n="btnPoster">Poster ↗</a>
+        </div>
+      </div>
+
+      <!-- Interactive Dual-Readout Stage -->
+      <figure class="stage-card" id="stage-figure">
+        <figcaption class="stage-head">
+          <div>
+            <span class="smallcap" data-i18n="stageEyebrow">Single Forward Pass</span>
+            <h2 id="stage-card-title" data-i18n="stageTitle">Same hidden state, conflicting causal verdicts</h2>
+          </div>
+          <div class="stage-mode" role="group" aria-label="Inspection mode">
+            <button type="button" data-viewmode="readout" aria-pressed="true" data-i18n="modeReadout">Dual Readout</button>
+            <button type="button" data-viewmode="lesion" aria-pressed="false" data-i18n="modeLesion">$V_{\mathrm{cs}}$ Erasure</button>
+          </div>
+        </figcaption>
+
+        <div class="stage-canvas">
+          <div class="stage-board" id="stage-board">
+            <svg id="fig-stage" class="stage-svg" aria-hidden="true"></svg>
+            <div id="stage-nodes"></div>
+          </div>
+        </div>
+
+        <div class="stage-transport">
+          <div class="step-pills" id="chapter-pills" role="group" aria-label="Walkthrough step"></div>
+          <button type="button" class="play-btn" id="stage-play">Play</button>
+        </div>
+
+        <div class="stage-caption" aria-live="polite" aria-atomic="true">
+          <strong id="stage-heading">Loading…</strong>
+          <p id="stage-detail"></p>
+        </div>
+      </figure>
+    </section>
+
+    <!-- Headline Metrics Band -->
+    <section class="metrics-band" aria-label="Key experimental highlights">
+      <div class="wrap metrics-grid">
+        <div>
+          <strong class="metric-val">96.9–100<span>%</span></strong>
+          <p data-i18n="metric1">Hidden-state probe accuracy vs. 35.0–52.5% Yes/No (0.5B–72B)</p>
+        </div>
+        <div>
+          <strong class="metric-val">−96.3<span>% KL</span></strong>
+          <p data-i18n="metric2">Counterfactual-KL drop when erasing $V_{\mathrm{cs}}$ (random: $+0.7\%$)</p>
+        </div>
+        <div>
+          <strong class="metric-val">26.3 → 98.8<span>%</span></strong>
+          <p data-i18n="metric3">Plain Yes/No vs. contrasting directed edges ($c \to e$ vs. $e \to c$)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2x2 Framework & Mechanistic Controls -->
+    <section class="wrap section" id="method">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="methodKicker">2×2 Diagnostic</span>
+          <h2 data-i18n="methodHeading">Separate internal recoverability from external expression.</h2>
+        </div>
+      </div>
+
+      <div class="pillars-grid">
+        <article class="pillar-card">
+          <span class="pillar-num">01 · Cell (b)</span>
+          <h3 data-i18n="p1Title">Fit on CS, Freeze Everywhere</h3>
+          <p data-i18n="p1Body">
+            Fit logistic probe $g_w(h)$ and subspace $V_{\mathrm{cs}}$ on commonsense items once; test frozen on anti-CS with zero LLM updates.
+          </p>
+          <div class="eq-box">$$\Delta = \mathrm{Acc}_{\mathrm{probe}}(\ell^\star) - \mathrm{Acc}_{\mathrm{out}} \approx +0.50$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num">02 · Mediation</span>
+          <h3 data-i18n="p2Title">Used Internally, Blocked Out</h3>
+          <p data-i18n="p2Body">
+            Erasing $V_{\mathrm{cs}}$ collapses paired counterfactual KL by $-96.3\%$; full layer-27 donor patching flips $57.1\%$ of wrong answers.
+          </p>
+          <div class="eq-box">$$h_i^{(\ell)} \leftarrow \big(I - V_{\mathrm{cs}}V_{\mathrm{cs}}^\top\big)\,h_i^{(\ell)}$$</div>
+        </article>
+
+        <article class="pillar-card">
+          <span class="pillar-num">03 · Interface</span>
+          <h3 data-i18n="p3Title">Contrast Directed Edges</h3>
+          <p data-i18n="p3Body">
+            Reframing Yes/No into A/B propositions still fails ($37.5\%$); contrasting $c \to e$ vs. $e \to c$ edges unlocks $98.8\%$.
+          </p>
+          <div class="eq-box">$$\mathrm{Acc}_{\mathrm{YN}}\,(26.3\%) \;\ll\; \mathrm{Acc}_{c\to e \text{ vs. } e\to c}\,(98.8\%)$$</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Interactive Scaling, Lesion & Interface Explorer -->
+    <section class="section section--alt" id="explorer">
+      <div class="wrap">
+        <div class="section-header">
+          <div>
+            <span class="smallcap" data-i18n="expKicker">Evidence · Tables 1, 3, 10 &amp; 22</span>
+            <h2 data-i18n="expHeading">Scale sweep, subspace lesions &amp; answer interfaces.</h2>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="wb-controls">
+            <div class="seg-group" id="audit-tabs" role="group" aria-label="Experimental audit">
+              <button type="button" data-audit="scaling" aria-pressed="true" data-i18n="tabScaling">0.5B–72B Scaling (Table 10)</button>
+              <button type="button" data-audit="lesion" aria-pressed="false" data-i18n="tabLesion">KL Lesion &amp; Patching</button>
+              <button type="button" data-audit="interface" aria-pressed="false" data-i18n="tabInterface">Interfaces &amp; Transfer</button>
+            </div>
+          </div>
+
+          <div class="wb-Subbar">
+            <div class="wb-legend" id="wb-legend"></div>
+            <div class="seg-group" id="sub-tabs" role="group" aria-label="Sub-experiment"></div>
+          </div>
+
+          <div class="paired-list" id="paired-rows" aria-live="polite"></div>
+          <p class="wb-note" id="wb-takeaway"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authentic Figures & EMNLP Poster -->
+    <section class="wrap section" id="figures">
+      <div class="section-header">
+        <div>
+          <span class="smallcap" data-i18n="figKicker">Figures &amp; Poster</span>
+          <h2 data-i18n="figHeading">Paper plots &amp; EMNLP 2026 poster.</h2>
+        </div>
+      </div>
+
+      <div class="fig-grid">
+        <figure class="fig-card wide">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig3-scaling-curve.webp" data-title="Figure 3 · 0.5B–72B Scaling Curve" data-caption="Probe accuracy reaches 0.969–1.000 while spoken Yes/No stays in 0.350–0.525 across $144\times$ scale.">
+            <img src="assets/fig3-scaling-curve.webp" alt="Scaling curve from 0.5B to 72B" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomFig">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">Figure 3</span>
+              <a href="../../assets/papers/causal-reasoning.pdf#page=6" target="_blank" rel="noreferrer" data-paper-p6>p.6 ↗</a>
+            </div>
+            <h3 data-i18n="f3Title">Internal Signal Scales; Spoken Yes/No Stalls</h3>
+            <p data-i18n="f3Cap">$144\times$ parameter scaling ($0.5\text{B} \to 72\text{B}$) leaves $\Delta \approx +0.50$ open on anti-CS CLADDER.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="../../assets/research/causal-reasoning-framework.webp" data-f1-img data-title="Figure 1 · 2×2 Framework" data-caption="Internal recoverability $\times$ external Yes/No agreement.">
+            <img src="../../assets/research/causal-reasoning-framework.webp" data-f1-img-el alt="2x2 framework" loading="lazy" />
+            <span class="zoom-hint">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">Figure 1</span>
+              <a href="../../assets/papers/causal-reasoning.pdf#page=3" target="_blank" rel="noreferrer" data-paper-p3>p.3 ↗</a>
+            </div>
+            <h3 data-i18n="f1Title">2×2 Benchmark Taxonomy</h3>
+            <p data-i18n="f1Cap">Separates Causal Tongue-Tie (cell b) from Causal Parrots (cell c).</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="../../assets/research/causal-reasoning.webp" data-f2-img data-title="Figure 2 · Single-Pass Readout Gap" data-caption="Probe recovers NO ($\approx 0.97$) while $\mathrm{lm\_head}$ outputs YES ($\approx 0.50$).">
+            <img src="../../assets/research/causal-reasoning.webp" data-f2-img-el alt="Single hidden state readout gap" loading="lazy" />
+            <span class="zoom-hint">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">Figure 2</span>
+              <a href="../../assets/papers/causal-reasoning.pdf#page=3" target="_blank" rel="noreferrer" data-paper-p3b>p.3 ↗</a>
+            </div>
+            <h3 data-i18n="f2Title">One Forward Pass, Two Answers</h3>
+            <p data-i18n="f2Cap">Both readouts branch from the same frozen last-token activation $h^{(\ell^\star)}$ / $h^{(L)}$.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig4-kl-lesion.webp" data-title="Figure 4 · Counterfactual-KL Lesion" data-caption="Projecting out $V_{\mathrm{cs}}$ removes 96.3% of counterfactual KL on Qwen-7B L27.">
+            <img src="assets/fig4-kl-lesion.webp" alt="Counterfactual KL lesion" loading="lazy" />
+            <span class="zoom-hint">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">Figure 4</span>
+              <a href="../../assets/papers/causal-reasoning.pdf#page=6" target="_blank" rel="noreferrer" data-paper-p6b>p.6 ↗</a>
+            </div>
+            <h3 data-i18n="f4Title">−96.3% Counterfactual-KL Lesion</h3>
+            <p data-i18n="f4Cap">Rank-matched sham $V_{\mathrm{ns}}$ (−31.7%), LEACE (−21.6%), and Haar $V_{\mathrm{rand}}$ (+0.7%) do not collapse KL.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card">
+          <button type="button" class="fig-thumb" data-lightbox="assets/fig6-interface-ladder.webp" data-title="Figure 6 · Answer-Interface Ladder" data-caption="Directed-edge contrast saturates while plain/real Yes/No collapses across 7B–72B.">
+            <img src="assets/fig6-interface-ladder.webp" alt="Answer interface ladder" loading="lazy" />
+            <span class="zoom-hint">Zoom ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">Figure 6</span>
+              <a href="../../assets/papers/causal-reasoning.pdf#page=8" target="_blank" rel="noreferrer" data-paper-p8>p.8 ↗</a>
+            </div>
+            <h3 data-i18n="f6Title">Answer-Interface Ladder</h3>
+            <p data-i18n="f6Cap">Contrasting explicit directed edges unlocks accuracy across 7B–72B.</p>
+          </figcaption>
+        </figure>
+
+        <figure class="fig-card wide">
+          <button type="button" class="fig-thumb" data-lightbox="../../assets/research/posters/causal-reasoning.webp" data-poster-img data-title="EMNLP 2026 Poster · Main #599" data-caption="Official EMNLP 2026 poster (Award Nomination <1%).">
+            <img src="../../assets/research/posters/causal-reasoning.webp" data-poster-img-el alt="EMNLP 2026 conference poster" loading="lazy" />
+            <span class="zoom-hint" data-i18n="zoomPoster">Zoom poster ↗</span>
+          </button>
+          <figcaption class="fig-body">
+            <div class="fig-meta">
+              <span class="smallcap">EMNLP 2026 · Main #599</span>
+              <a href="../../assets/research/posters/causal-reasoning.pdf" target="_blank" rel="noreferrer" data-poster-pdf>PDF ↗</a>
+            </div>
+            <h3 data-i18n="posterTitle">Award-Nominated Poster</h3>
+            <p data-i18n="posterCap">Visual summary of the 2×2 framework, scaling sweep, KL erasure, and edge-contrast tests.</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Scope, Citation & Sibling Pages -->
+    <section class="wrap section" id="cite">
+      <div class="split-grid">
+        <div class="scope-box">
+          <span class="smallcap" data-i18n="scopeKicker">Scope</span>
+          <h3 data-i18n="scopeTitle">Diagnostic measurement, not a universal repair</h3>
+          <p data-i18n="scopeP1">
+            <strong>Operational definition:</strong> Linear recoverability diagnoses a representation–output gap on controlled textual queries, not human-like understanding or raw sensor causal discovery.
+          </p>
+          <p data-i18n="scopeP2">
+            <strong>Control &amp; templates:</strong> Scalar $V_{\mathrm{cs}}$ swaps do not flip Yes/No alone (full L27 patching flips 57.1%); linear probe directions remain template- and layer-conditioned (cross-template mean 0.672).
+          </p>
+        </div>
+
+        <div class="bib-card">
+          <div class="bib-head">
+            <span>BibTeX · EMNLP 2026</span>
+            <button type="button" class="copy-btn" id="copy-bib">Copy BibTeX</button>
+          </div>
+          <pre id="bib-text">@inproceedings{ding2026tonguetie,
+  title     = {Causal Tongue-Tie: LLMs Can Encode Causal Direction, But Their Yes/No Outputs Fail to Express},
+  author    = {Ding, Ziyi and Zhang, Xiao-Ping},
+  booktitle = {Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+  year      = {2026},
+  url       = {https://arxiv.org/abs/2605.25891}
+}</pre>
+        </div>
+      </div>
+
+      <div class="sibling-nav" aria-label="Companion research pages">
+        <span class="smallcap" data-i18n="morePages">Companion Research Pages</span>
+        <div class="sibling-grid">
+          <a class="sibling-card" href="../causalvae/index.html" data-sibling="causalvae">
+            <span>ECCV 2026</span>
+            <strong>CausalVAE Plug-in</strong>
+            <p>Causal DAG layer for world models.</p>
+          </a>
+          <a class="sibling-card" href="../traj-lewm/index.html" data-sibling="traj-lewm">
+            <span>arXiv 2026</span>
+            <strong>Traj-LeWM</strong>
+            <p>Path-aware planning via trajectory cost.</p>
+          </a>
+          <a class="sibling-card" href="./index.html" aria-current="page">
+            <span>EMNLP 2026 · Award Nom.</span>
+            <strong>Causal Tongue-Tie</strong>
+            <p>Hidden causal probes vs. Yes/No output.</p>
+          </a>
+          <a class="sibling-card" href="https://dzyy123.github.io/EgoLAM-Pages/" target="_blank" rel="noreferrer">
+            <span>Embodied AI</span>
+            <strong>EgoLAM ↗</strong>
+            <p>Latent actions from hand &amp; head motion.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-row">
+      <span>Ziyi Ding (丁子毅) · Tsinghua SIGS</span>
+      <div>
+        <a href="../../" data-studio-home>Research Studio</a> ·
+        <a href="https://scholar.google.com/citations?user=1KeE6PsAAAAJ" target="_blank" rel="noreferrer">Scholar</a> ·
+        <a href="https://github.com/Dzyy123" target="_blank" rel="noreferrer">GitHub</a> ·
+        <a href="#main">Top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox" aria-label="Figure viewer">
+    <div class="lb-head">
+      <strong id="lb-title">Figure</strong>
+      <button type="button" class="lb-close" id="lb-close">Close (Esc)</button>
+    </div>
+    <div class="lb-body">
+      <img id="lb-img" src="" alt="" />
+    </div>
+    <div class="lb-cap" id="lb-cap"></div>
+  </dialog>
+</body>
+</html>
